@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
+import { Users, Receipt, RefreshCw, Plus, LogIn } from 'lucide-react';
 import GroupCard from '../components/GroupCard';
+import SkeletonCard from '../components/ui/SkeletonCard';
 import { createGroup, getGroups, joinGroup, syncUser } from '../services/api';
 
 const defaultCreateState = {
@@ -131,65 +133,82 @@ function Dashboard() {
     }
   };
 
-  return (
-    <section className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
-      <div className="grid gap-6 lg:grid-cols-[1.4fr_0.9fr]">
-        <div className="rounded-3xl border border-slate-800 bg-gradient-to-br from-cyan-500/10 via-slate-900/80 to-slate-900 p-8 shadow-xl shadow-slate-950/30">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400">Dashboard</p>
-          <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
-            Welcome back{user?.given_name ? `, ${user.given_name}` : ''}.
-          </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-            Create expense groups, invite friends, and settle balances with Algorand Testnet payments from one tidy place.
-          </p>
+  const totalExpenses = groups.reduce(
+    (sum, g) => sum + (g?.expenseCount || g?.expenses?.length || 0),
+    0,
+  );
+  const totalMembers = groups.reduce(
+    (sum, g) => sum + (g?.members?.length || g?.memberCount || 0),
+    0,
+  );
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-              <p className="text-sm text-slate-400">Groups</p>
-              <p className="mt-2 text-2xl font-semibold text-white">{groups.length}</p>
-            </div>
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-              <p className="text-sm text-slate-400">Invite-ready</p>
-              <p className="mt-2 text-2xl font-semibold text-white">
-                {groups.filter((group) => group?.inviteCode).length}
-              </p>
-            </div>
-            <div className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4">
-              <p className="text-sm text-slate-400">Tracked expenses</p>
-              <p className="mt-2 text-2xl font-semibold text-white">
-                {groups.reduce((sum, group) => sum + (group?.expenseCount || group?.expenses?.length || 0), 0)}
-              </p>
-            </div>
+  return (
+    <div className="space-y-8">
+      {/* Welcome heading */}
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400">
+          Dashboard
+        </p>
+        <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
+          Welcome back{user?.given_name ? `, ${user.given_name}` : ''} 👋
+        </h1>
+        <p className="mt-1 text-sm text-slate-400">
+          Track your shared expenses and settle on Algorand.
+        </p>
+      </div>
+
+      {/* Stats row */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
+            <Users size={20} />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400">Your groups</p>
+            <p className="mt-0.5 text-2xl font-bold text-white">{groups.length}</p>
           </div>
         </div>
-
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-8 shadow-lg shadow-slate-950/30">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">Your profile</p>
-          <div className="mt-4 flex items-center gap-4">
-            <img
-              src={user?.picture}
-              alt={user?.name || 'User profile'}
-              className="h-16 w-16 rounded-2xl border border-slate-700 object-cover"
-            />
-            <div>
-              <h2 className="text-lg font-semibold text-white">{user?.name || 'Anonymous explorer'}</h2>
-              <p className="text-sm text-slate-400">{user?.email || 'No email provided'}</p>
-            </div>
+        <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
+            <Receipt size={20} />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400">Total expenses</p>
+            <p className="mt-0.5 text-2xl font-bold text-white">{totalExpenses}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
+            <Users size={20} />
+          </div>
+          <div>
+            <p className="text-xs text-slate-400">Active members</p>
+            <p className="mt-0.5 text-2xl font-bold text-white">{totalMembers}</p>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <div className="space-y-6">
+      {/* Main grid: forms + groups list */}
+      <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
+        {/* Left: Create + Join forms */}
+        <div className="space-y-5">
+          {/* Create group */}
           <form
             onSubmit={handleCreateGroup}
             className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-lg shadow-slate-950/30"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">Create group</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Start a new split</h2>
-            <div className="mt-6 space-y-4">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
+                <Plus size={16} />
+              </div>
+              <h2 className="text-base font-semibold text-white">New group</h2>
+            </div>
+            <div className="mt-5 space-y-4">
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-200" htmlFor="group-name">
+                <label
+                  className="mb-1.5 block text-xs font-medium text-slate-300"
+                  htmlFor="group-name"
+                >
                   Group name
                 </label>
                 <input
@@ -197,41 +216,52 @@ function Dashboard() {
                   type="text"
                   value={createForm.name}
                   onChange={handleCreateChange('name')}
-                  placeholder="Goa getaway"
-                  className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                  placeholder="Goa trip, office lunch…"
+                  className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-200" htmlFor="group-description">
-                  Description
+                <label
+                  className="mb-1.5 block text-xs font-medium text-slate-300"
+                  htmlFor="group-description"
+                >
+                  Description <span className="text-slate-600">(optional)</span>
                 </label>
                 <textarea
                   id="group-description"
                   value={createForm.description}
                   onChange={handleCreateChange('description')}
-                  rows="4"
-                  placeholder="Weekend food, rides, and stay"
-                  className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+                  rows="3"
+                  placeholder="What's this group for?"
+                  className="w-full resize-none rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400"
                 />
               </div>
             </div>
             <button
               type="submit"
               disabled={creating}
-              className="mt-6 inline-flex w-full items-center justify-center rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {creating ? 'Creating group...' : 'Create group'}
+              {creating ? 'Creating…' : 'Create group'}
             </button>
           </form>
 
+          {/* Join group */}
           <form
             onSubmit={handleJoinGroup}
             className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-lg shadow-slate-950/30"
           >
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">Join group</p>
-            <h2 className="mt-2 text-2xl font-semibold text-white">Enter an invite code</h2>
-            <div className="mt-6">
-              <label className="mb-2 block text-sm font-medium text-slate-200" htmlFor="invite-code">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-700/60 text-slate-300">
+                <LogIn size={16} />
+              </div>
+              <h2 className="text-base font-semibold text-white">Join a group</h2>
+            </div>
+            <div className="mt-5">
+              <label
+                className="mb-1.5 block text-xs font-medium text-slate-300"
+                htmlFor="invite-code"
+              >
                 Invite code
               </label>
               <input
@@ -240,59 +270,71 @@ function Dashboard() {
                 value={inviteCode}
                 onChange={(event) => setInviteCode(event.target.value)}
                 placeholder="SPLIT-ALGO-2026"
-                className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm uppercase tracking-[0.2em] text-white outline-none transition focus:border-cyan-400"
+                className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm uppercase tracking-[0.15em] text-white outline-none transition placeholder:normal-case placeholder:tracking-normal placeholder:text-slate-600 focus:border-cyan-400"
               />
             </div>
             <button
               type="submit"
               disabled={joining}
-              className="mt-6 inline-flex w-full items-center justify-center rounded-2xl border border-slate-700 px-5 py-3 text-sm font-semibold text-white transition hover:border-cyan-400 hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-5 inline-flex w-full items-center justify-center rounded-xl border border-slate-700 px-5 py-3 text-sm font-semibold text-white transition hover:border-cyan-400/60 hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-70"
             >
-              {joining ? 'Joining group...' : 'Join group'}
+              {joining ? 'Joining…' : 'Join group'}
             </button>
           </form>
         </div>
 
+        {/* Right: Groups list */}
         <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-lg shadow-slate-950/30">
-          <div className="flex flex-col gap-3 border-b border-slate-800 pb-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-5">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">Your groups</p>
-              <h2 className="mt-2 text-2xl font-semibold text-white">Everything you are tracking</h2>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">
+                Your groups
+              </p>
+              <h2 className="mt-1 text-lg font-semibold text-white">Everything you're tracking</h2>
             </div>
             <button
               type="button"
               onClick={loadGroups}
-              className="inline-flex items-center rounded-xl border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:text-white"
             >
-              Refresh list
+              <RefreshCw size={13} />
+              Refresh
             </button>
           </div>
 
-          {error ? <p className="mt-4 rounded-2xl bg-amber-500/10 px-4 py-3 text-sm text-amber-300">{error}</p> : null}
+          {error ? (
+            <p className="mt-4 rounded-xl bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+              {error}
+            </p>
+          ) : null}
 
           {loading ? (
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="h-56 animate-pulse rounded-3xl bg-slate-800/70" />
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <SkeletonCard key={i} />
               ))}
             </div>
           ) : groups.length ? (
-            <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="mt-6 grid gap-4 sm:grid-cols-2">
               {groups.map((group) => (
                 <GroupCard key={group?.id || group?.groupId} group={group} />
               ))}
             </div>
           ) : (
             <div className="mt-6 rounded-3xl border border-dashed border-slate-700 bg-slate-950/50 p-10 text-center">
-              <h3 className="text-xl font-semibold text-white">No groups yet</h3>
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-800">
+                <Users size={24} className="text-slate-500" />
+              </div>
+              <h3 className="text-base font-semibold text-white">No groups yet</h3>
               <p className="mt-2 text-sm text-slate-400">
-                Create your first split and invite the squad. Bills wait for no one.
+                Create your first split and invite the squad.
               </p>
             </div>
           )}
         </div>
       </div>
-    </section>
+    </div>
   );
 }
 
