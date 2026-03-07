@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
-import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Users, Receipt, RefreshCw, Plus, Wallet } from 'lucide-react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Users, Receipt, RefreshCw, Plus, Trash2, UserMinus, Wallet } from 'lucide-react';
 import ExpenseForm from '../components/ExpenseForm';
 import SkeletonCard from '../components/ui/SkeletonCard';
-import { checkTransaction, sendPayment } from '../services/algorand';
-import { createExpense, createSettlement, getGroupBalances, getGroupById, getGroupExpenses } from '../services/api';
+import { checkTransaction, getAccountBalance, sendPayment } from '../services/algorand';
+import { createExpense, createSettlement, deleteGroup, getGroupBalances, getGroupById, getGroupExpenses, removeMember } from '../services/api';
 import { getAlgoPriceINR } from '../services/algoPrice';
+import { useWallet } from '../context/WalletContext';
 
 const currencyFormatter = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -54,6 +55,8 @@ const resolveBalanceParties = (balance) => {
 function GroupPage({ walletAddress }) {
   const { groupId } = useParams();
   const { getAccessTokenSilently } = useAuth0();
+  const { backendUserId } = useWallet();
+  const navigate = useNavigate();
   const [group, setGroup] = useState(null);
   const [showExpenseForm, setShowExpenseForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -64,11 +67,26 @@ function GroupPage({ walletAddress }) {
   const [expenses, setExpenses] = useState([]);
   const [balances, setBalances] = useState([]);
   const [algoPriceINR, setAlgoPriceINR] = useState(null);
+  // paymentAmounts[key] = custom amount string the user typed per balance card
+  const [paymentAmounts, setPaymentAmounts] = useState({});
+  const [deletingGroup, setDeletingGroup] = useState(false);
+  const [removingMemberId, setRemovingMemberId] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(null); // ALGO balance of connected wallet
+  const [balanceError, setBalanceError] = useState('');
 
   // Fetch live ALGO/INR price once on mount for the conversion preview
   useEffect(() => {
     getAlgoPriceINR().then(setAlgoPriceINR).catch(() => setAlgoPriceINR(80));
   }, []);
+
+  // Refresh wallet ALGO balance whenever the connected address changes
+  useEffect(() => {
+    if (!walletAddress) {
+      setWalletBalance(null);
+      return;
+    }
+    getAccountBalance(walletAddress).then(setWalletBalance).catch(() => setWalletBalance(null));
+  }, [walletAddress]);
 
   const getToken = useCallback(async () => {
     try {
@@ -107,6 +125,15 @@ function GroupPage({ walletAddress }) {
 
   const members = normalizeMembers(group).map((m) => m.user || m);
 
+  // Derive admin status: the user who created the group is the admin
+  const isAdmin =
+    group?.createdBy?.id != null &&
+    backendUserId != null &&
+    Number(group.createdBy.id) === Number(backendUserId);
+
+  // A group can be deleted only when all remaining balances are 0
+  const allSettled = balances.length === 0;
+
   const handleExpenseSubmit = async (payload) => {
     setSubmittingExpense(true);
     setError('');
@@ -135,44 +162,44 @@ function GroupPage({ walletAddress }) {
     }
   };
 
-  const handleSettlePayment = async (balance, index) => {
-    console.log('[Settlement] Settle payment clicked', { balance, index });
+  const handleSettlePayment = async (balance, index, customPaymentAmount) => {
+    console.log('[Settlement] Settle payment clicked', { balance, index, customPaymentAmount });
 
     const { creditorWallet, amount, debtorName, creditorName } = resolveBalanceParties(balance);
-    console.log('[Settlement] Parties resolved', { debtorName, creditorName, creditorWallet, amount });
+    // amount here = remaining balance (what's still owed)
+    const paymentAmt = (customPaymentAmount && Number(customPaymentAmount) > 0)
+      ? Math.min(Number(customPaymentAmount), amount)
+      : amount;
+
+    console.log('[Settlement] Parties resolved', { debtorName, creditorName, creditorWallet, amount, paymentAmt });
     console.log('[Settlement] Sender wallet (connected):', walletAddress);
 
     if (!walletAddress) {
-      console.warn('[Settlement] No wallet connected — aborting');
       setError('Connect your Pera Wallet before settling a payment.');
       return;
     }
 
     if (!creditorWallet) {
-      console.warn('[Settlement] Creditor wallet address is missing — aborting');
       setError('Recipient wallet address is missing for this balance.');
       return;
     }
 
     setSettlingId(balance?.id || `${index}`);
     setError('');
+    setBalanceError('');
     setSuccessMessage('');
 
     try {
-      console.log('[Settlement] Calling sendPayment:', { sender: walletAddress, receiver: creditorWallet, amount });
       const txId = await sendPayment({
         sender: walletAddress,
         receiver: creditorWallet,
-        amount,
+        amount: paymentAmt,
         note: `SplitBill settlement for group ${groupId}`,
       });
       console.log('[Settlement] Payment sent — txId:', txId);
 
       const transactionStatus = await checkTransaction(txId);
-      console.log('[Settlement] Transaction status:', transactionStatus);
-
       const token = await getToken();
-      console.log('[Settlement] Calling POST /api/settlements with fromUserId:', balance.fromUser, 'toUserId:', balance.toUser);
 
       await createSettlement(
         {
@@ -180,20 +207,74 @@ function GroupPage({ walletAddress }) {
           txId,
           fromUserId: balance.fromUser,
           toUserId: balance.toUser,
-          amount,
+          amount: paymentAmt,       // paymentAmount (partial or full)
+          totalAmount: amount,      // full remaining balance before this payment
           status: transactionStatus.confirmed ? 'confirmed' : 'pending',
         },
         token,
       );
       console.log('[Settlement] Settlement recorded in backend');
 
-      setSuccessMessage(`Settlement sent from ${debtorName} to ${creditorName}. Tx: ${txId}`);
+      const remaining = amount - paymentAmt;
+      if (remaining > 0) {
+        setSuccessMessage(
+          `Partial payment of ${formatMoney(paymentAmt)} sent to ${creditorName}. Remaining: ${formatMoney(remaining)}. Tx: ${txId}`,
+        );
+      } else {
+        setSuccessMessage(`Full settlement sent from ${debtorName} to ${creditorName}. Tx: ${txId}`);
+      }
+      // Reset the custom amount for this card
+      setPaymentAmounts((prev) => { const next = { ...prev }; delete next[balance?.id || `${index}`]; return next; });
       await loadGroup();
     } catch (settleError) {
       console.error('[Settlement] Settlement failed:', settleError);
-      setError(settleError.message || 'Unable to settle payment.');
+      if (settleError.message === 'INSUFFICIENT_BALANCE') {
+        setBalanceError('Insufficient ALGO balance. Please add funds to your wallet.');
+        // Refresh balance so the button disables immediately
+        if (walletAddress) getAccountBalance(walletAddress).then(setWalletBalance).catch(() => {});
+      } else {
+        setError(settleError.message || 'Unable to settle payment.');
+      }
     } finally {
       setSettlingId('');
+    }
+  };
+
+  const handleDeleteGroup = async () => {
+    if (!backendUserId) {
+      setError('Unable to identify current user.');
+      return;
+    }
+    if (!window.confirm('Delete this group? This action cannot be undone.')) return;
+    setDeletingGroup(true);
+    setError('');
+    try {
+      const token = await getToken();
+      await deleteGroup(Number(groupId), backendUserId, token);
+      navigate('/dashboard');
+    } catch (deleteError) {
+      setError(deleteError.message || 'Unable to delete group.');
+    } finally {
+      setDeletingGroup(false);
+    }
+  };
+
+  const handleRemoveMember = async (userId) => {
+    if (!backendUserId) {
+      setError('Unable to identify current user.');
+      return;
+    }
+    setRemovingMemberId(userId);
+    setError('');
+    try {
+      const token = await getToken();
+      await removeMember(Number(groupId), userId, backendUserId, token);
+      setSuccessMessage('Member removed successfully.');
+      await loadGroup();
+    } catch (removeError) {
+      setError(removeError.message || 'Unable to remove member.');
+    } finally {
+      setRemovingMemberId(null);
     }
   };
 
@@ -292,6 +373,11 @@ function GroupPage({ walletAddress }) {
       </div>
 
       {error ? <p className="rounded-2xl bg-amber-500/10 px-4 py-3 text-sm text-amber-300">{error}</p> : null}
+      {balanceError ? (
+        <div className="rounded-2xl bg-red-500/20 px-4 py-3 text-sm text-red-400">
+          {balanceError}
+        </div>
+      ) : null}
       {successMessage ? (
         <p className="rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">{successMessage}</p>
       ) : null}
@@ -315,20 +401,45 @@ function GroupPage({ walletAddress }) {
             </div>
 
             <div className="mt-6 space-y-3">
-              {members.map((member) => (
-                <div
-                  key={getEntityId(member)}
-                  className="flex flex-col items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="min-w-0 w-full">
-                    <p className="truncate font-medium text-white">{getEntityName(member)}</p>
-                    <p className="truncate text-sm text-slate-400">{member?.email || getWalletAddress(member) || 'Wallet pending'}</p>
+              {members.map((member) => {
+                const memberId = getEntityId(member);
+                const isCreator = group?.createdBy?.id != null && Number(group.createdBy.id) === Number(memberId);
+                return (
+                  <div
+                    key={memberId}
+                    className="flex flex-col items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="min-w-0 w-full">
+                      <div className="flex items-center gap-2">
+                        <p className="truncate font-medium text-white">{getEntityName(member)}</p>
+                        {isCreator && (
+                          <span className="shrink-0 rounded-full bg-cyan-500/15 px-2 py-0.5 text-xs font-semibold text-cyan-400">
+                            Admin
+                          </span>
+                        )}
+                      </div>
+                      <p className="truncate text-sm text-slate-400">{member?.email || getWalletAddress(member) || 'Wallet pending'}</p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
+                        {getWalletAddress(member) ? 'Wallet ready' : 'Wallet not linked'}
+                      </span>
+                      {isAdmin && !isCreator && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveMember(Number(memberId))}
+                          disabled={removingMemberId === Number(memberId)}
+                          className="inline-flex items-center gap-1 rounded-xl border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-xs font-medium text-red-400 transition hover:bg-red-500/20 disabled:cursor-not-allowed disabled:opacity-50"
+                          title="Remove member"
+                        >
+                          <UserMinus size={12} />
+                          {removingMemberId === Number(memberId) ? 'Removing…' : 'Remove'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <span className="shrink-0 rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
-                    {getWalletAddress(member) ? 'Wallet ready' : 'Wallet not linked'}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 
@@ -389,6 +500,12 @@ function GroupPage({ walletAddress }) {
               balances.map((balance, index) => {
                 const { debtorName, creditorName, debtorWallet, creditorWallet, amount } = resolveBalanceParties(balance);
                 const settleKey = balance?.id || `${index}`;
+                const paidAmount = Number(balance?.paidAmount ?? 0);
+                const totalAmount = Number(balance?.totalAmount ?? amount);
+                // amount from resolveBalanceParties already = remaining (from backend)
+                const customAmt = paymentAmounts[settleKey];
+                const paymentValue = customAmt !== undefined ? customAmt : String(amount.toFixed(2));
+                const paymentNum = Math.min(Math.max(Number(paymentValue) || 0, 0), amount);
 
                 return (
                   <div
@@ -401,19 +518,27 @@ function GroupPage({ walletAddress }) {
                           {debtorName} owes {creditorName}
                         </p>
 
-                        {/* INR amount + live ALGO estimate */}
-                        <div className="mt-2 inline-flex flex-wrap items-baseline gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-3 py-2">
-                          <span className="text-lg font-bold text-white">{formatMoney(amount)}</span>
-                          {algoPriceINR ? (
-                            <>
-                              <span className="text-sm text-slate-400">≈</span>
-                              <span className="text-lg font-bold text-cyan-300">
-                                {(amount / algoPriceINR).toFixed(4)} ALGO
-                              </span>
-                              <span className="text-xs text-slate-500">(@ ₹{algoPriceINR}/ALGO)</span>
-                            </>
-                          ) : (
-                            <span className="text-xs text-slate-500">fetching ALGO price...</span>
+                        {/* Paid / Remaining breakdown */}
+                        <div className="mt-2 flex flex-wrap gap-3">
+                          <div className="inline-flex flex-wrap items-baseline gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-3 py-2">
+                            <span className="text-xs text-slate-400">Remaining:</span>
+                            <span className="text-lg font-bold text-white">{formatMoney(amount)}</span>
+                            {algoPriceINR && (
+                              <>
+                                <span className="text-sm text-slate-400">≈</span>
+                                <span className="text-lg font-bold text-cyan-300">
+                                  {(amount / algoPriceINR).toFixed(4)} ALGO
+                                </span>
+                                <span className="text-xs text-slate-500">(@ ₹{algoPriceINR}/ALGO)</span>
+                              </>
+                            )}
+                          </div>
+                          {paidAmount > 0 && (
+                            <div className="inline-flex items-baseline gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2">
+                              <span className="text-xs text-slate-400">Paid:</span>
+                              <span className="text-sm font-semibold text-emerald-400">{formatMoney(paidAmount)}</span>
+                              <span className="text-xs text-slate-500">of {formatMoney(totalAmount)}</span>
+                            </div>
                           )}
                         </div>
 
@@ -425,23 +550,58 @@ function GroupPage({ walletAddress }) {
                         </p>
                       </div>
 
-                      <div className="flex shrink-0 flex-col items-start lg:items-end gap-2">
-                        {algoPriceINR ? (
+                      <div className="flex shrink-0 flex-col items-start lg:items-end gap-3">
+                        {/* Custom payment amount input */}
+                        <div className="w-full lg:w-44">
+                          <label className="mb-1 block text-xs text-slate-400">Pay amount (₹)</label>
+                          <input
+                            type="number"
+                            min="0.01"
+                            max={amount}
+                            step="0.01"
+                            value={paymentValue}
+                            onChange={(e) =>
+                              setPaymentAmounts((prev) => ({ ...prev, [settleKey]: e.target.value }))
+                            }
+                            className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                            placeholder={amount.toFixed(2)}
+                          />
+                          {paymentNum > 0 && paymentNum < amount && (
+                            <p className="mt-1 text-xs text-amber-400">
+                              Remaining after: {formatMoney(amount - paymentNum)}
+                            </p>
+                          )}
+                        </div>
+
+                        {algoPriceINR && paymentNum > 0 && (
                           <p className="text-xs text-slate-400">
-                            Wallet will show <span className="font-semibold text-cyan-300">{(amount / algoPriceINR).toFixed(4)} ALGO</span>
+                            Wallet will show{' '}
+                            <span className="font-semibold text-cyan-300">
+                              {(paymentNum / algoPriceINR).toFixed(4)} ALGO
+                            </span>
                           </p>
-                        ) : null}
+                        )}
+
                         <button
                           type="button"
-                          onClick={() => handleSettlePayment(balance, index)}
-                          disabled={!walletAddress || !creditorWallet || settlingId === settleKey}
+                          onClick={() => handleSettlePayment(balance, index, paymentNum)}
+                          disabled={
+                            !walletAddress ||
+                            !creditorWallet ||
+                            settlingId === settleKey ||
+                            paymentNum <= 0 ||
+                            // Only disable when balance is confirmed (not null) AND too low
+                            (walletBalance !== null && algoPriceINR !== null
+                              ? walletBalance < paymentNum / algoPriceINR + 0.001
+                              : false)
+                          }
                           className="inline-flex w-full lg:w-auto items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {settlingId === settleKey
                             ? 'Settling...'
-                            : algoPriceINR
-                              ? `Settle ${(amount / algoPriceINR).toFixed(4)} ALGO`
-                              : 'Settle payment'}
+                            : algoPriceINR && paymentNum > 0
+                              ? `Pay ${(paymentNum / algoPriceINR).toFixed(4)} ALGO`
+                              : 'Pay now'}
                         </button>
                       </div>
                     </div>
@@ -450,12 +610,34 @@ function GroupPage({ walletAddress }) {
               })
             ) : (
               <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 p-8 text-center">
-                <p className="text-sm text-slate-400">Balances will appear here once the backend computes who owes whom.</p>
+                <p className="text-sm text-slate-400">All balances settled — everyone is square!</p>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Admin controls — delete group (only when all balances settled) */}
+      {isAdmin && (
+        <div className="rounded-3xl border border-red-500/20 bg-red-500/5 p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-red-400">Admin controls</p>
+          <h2 className="mt-1 text-lg font-semibold text-white">Danger zone</h2>
+          <p className="mt-1.5 text-sm text-slate-400">
+            {allSettled
+              ? 'All balances are settled. You may delete this group.'
+              : 'The group can only be deleted once all member balances are fully settled.'}
+          </p>
+          <button
+            type="button"
+            onClick={handleDeleteGroup}
+            disabled={!allSettled || deletingGroup}
+            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <Trash2 size={14} />
+            {deletingGroup ? 'Deleting…' : 'Delete Group'}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

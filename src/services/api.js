@@ -115,3 +115,25 @@ export const createSettlement = async (payload, token) => {
     throw normalizeError(error);
   }
 };
+
+export const deleteGroup = async (groupId, requestingUserId, token) => {
+  try {
+    await apiClient.delete(
+      `/api/groups/${groupId}`,
+      { ...buildConfig(token), params: { requestingUserId } },
+    );
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
+
+export const removeMember = async (groupId, userId, requestingUserId, token) => {
+  try {
+    await apiClient.delete(
+      `/api/groups/${groupId}/members/${userId}`,
+      { ...buildConfig(token), params: { requestingUserId } },
+    );
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
