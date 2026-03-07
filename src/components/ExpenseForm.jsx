@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 
 const getMemberId = (member) => member?.id || member?.userId || member?.walletAddress || member?.email;
 const getMemberLabel = (member) => member?.name || member?.displayName || member?.email || member?.walletAddress || 'Member';
@@ -68,7 +68,7 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
   };
 
   return (
-    <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-lg shadow-slate-950/30">
+    <div className="rounded-3xl border border-theme-border bg-theme-surface p-6 shadow-lg shadow-theme-border/30">
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">New expense</p>
@@ -77,7 +77,7 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
         <button
           type="button"
           onClick={onCancel}
-          className="rounded-xl border border-slate-700 px-3 py-2 text-sm font-medium text-slate-300 transition hover:border-slate-500 hover:text-white"
+          className="rounded-xl border border-theme-border px-3 py-2 text-sm font-medium text-theme-subtext transition hover:border-theme-subtext hover:text-theme-text"
         >
           Close
         </button>
@@ -85,7 +85,7 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
 
       <form className="space-y-5" onSubmit={handleSubmit}>
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-200" htmlFor="expense-description">
+          <label className="mb-2 block text-sm font-medium text-theme-subtext" htmlFor="expense-description">
             Description
           </label>
           <input
@@ -94,13 +94,13 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             placeholder="Dinner, rent, gas..."
-            className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+            className="w-full rounded-2xl border border-theme-border bg-theme-bg px-4 py-3 text-sm text-theme-text outline-none transition focus:border-cyan-400"
           />
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-200" htmlFor="expense-amount">
+            <label className="mb-2 block text-sm font-medium text-theme-subtext" htmlFor="expense-amount">
               Amount
             </label>
             <input
@@ -111,19 +111,19 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
               value={amount}
               onChange={(event) => setAmount(event.target.value)}
               placeholder="0.00"
-              className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+              className="w-full rounded-2xl border border-theme-border bg-theme-bg px-4 py-3 text-sm text-theme-text outline-none transition focus:border-cyan-400"
             />
           </div>
 
           <div>
-            <label className="mb-2 block text-sm font-medium text-slate-200" htmlFor="expense-paid-by">
+            <label className="mb-2 block text-sm font-medium text-theme-subtext" htmlFor="expense-paid-by">
               Who paid
             </label>
             <select
               id="expense-paid-by"
               value={paidBy}
               onChange={(event) => setPaidBy(event.target.value)}
-              className="w-full rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition focus:border-cyan-400"
+              className="w-full rounded-2xl border border-theme-border bg-theme-bg px-4 py-3 text-sm text-theme-text outline-none transition focus:border-cyan-400"
             >
               {members.map((member) => {
                 const memberId = getMemberId(member);
@@ -139,7 +139,7 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
         </div>
 
         <div>
-          <p className="mb-3 text-sm font-medium text-slate-200">Split between</p>
+          <p className="mb-3 text-sm font-medium text-theme-subtext">Split between</p>
           <div className="grid gap-3 sm:grid-cols-2">
             {members.map((member) => {
               const memberId = getMemberId(member);
@@ -150,8 +150,8 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
                   key={memberId}
                   className={`flex cursor-pointer items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
                     isChecked
-                      ? 'border-cyan-400 bg-cyan-500/10 text-white'
-                      : 'border-slate-700 bg-slate-950/70 text-slate-300'
+                      ? 'border-cyan-400 bg-cyan-50 text-theme-text'
+                      : 'border-theme-border bg-theme-bg text-theme-subtext'
                   }`}
                 >
                   <span>{getMemberLabel(member)}</span>
@@ -167,13 +167,13 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
           </div>
         </div>
 
-        {error ? <p className="text-sm text-amber-300">{error}</p> : null}
+        {error ? <p className="text-sm text-amber-600">{error}</p> : null}
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-2xl border border-slate-700 px-5 py-3 text-sm font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white"
+            className="rounded-2xl border border-theme-border px-5 py-3 text-sm font-semibold text-theme-subtext transition hover:border-theme-subtext hover:text-theme-text"
           >
             Cancel
           </button>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+﻿import { useCallback, useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Users, Receipt, RefreshCw, Plus, Trash2, UserMinus, Wallet } from 'lucide-react';
@@ -282,23 +282,23 @@ function GroupPage({ walletAddress }) {
     return (
       <div className="space-y-8 animate-pulse">
         <div className="space-y-3">
-          <div className="h-4 w-32 rounded bg-slate-800" />
-          <div className="h-8 w-64 rounded-lg bg-slate-800" />
+          <div className="h-4 w-32 rounded bg-theme-border" />
+          <div className="h-8 w-64 rounded-lg bg-theme-border" />
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           {[1, 2, 3].map((n) => (
-            <div key={n} className="flex h-24 items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-              <div className="h-11 w-11 rounded-xl bg-slate-800" />
+            <div key={n} className="flex h-24 items-center gap-4 rounded-2xl border border-theme-border bg-theme-surface p-5">
+              <div className="h-11 w-11 rounded-xl bg-theme-border" />
               <div className="space-y-2">
-                <div className="h-3 w-16 rounded bg-slate-800" />
-                <div className="h-5 w-10 rounded bg-slate-800" />
+                <div className="h-3 w-16 rounded bg-theme-border" />
+                <div className="h-5 w-10 rounded bg-theme-border" />
               </div>
             </div>
           ))}
         </div>
         <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-          <div className="h-80 rounded-3xl border border-slate-800 bg-slate-900/80 p-6" />
-          <div className="h-80 rounded-3xl border border-slate-800 bg-slate-900/80 p-6" />
+          <div className="h-80 rounded-3xl border border-theme-border bg-theme-surface p-6" />
+          <div className="h-80 rounded-3xl border border-theme-border bg-theme-surface p-6" />
         </div>
       </div>
     );
@@ -307,9 +307,9 @@ function GroupPage({ walletAddress }) {
   if (!group) {
     return (
       <div className="mx-auto w-full max-w-md text-center">
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-10">
-          <h1 className="text-2xl font-semibold text-white">Group not found</h1>
-          <p className="mt-3 text-sm text-slate-400">This split may have vanished into the blockchain mist.</p>
+        <div className="rounded-3xl border border-theme-border bg-theme-surface p-10">
+          <h1 className="text-2xl font-semibold text-theme-text">Group not found</h1>
+          <p className="mt-3 text-sm text-theme-subtext">This split may have vanished into the blockchain mist.</p>
           <Link
             to="/dashboard"
             className="mt-6 inline-flex rounded-2xl bg-cyan-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
@@ -327,68 +327,68 @@ function GroupPage({ walletAddress }) {
       <div>
         <Link
           to="/dashboard"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-400 transition hover:text-cyan-300"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-theme-subtext transition hover:text-cyan-500"
         >
           <ArrowLeft size={13} />
           Back to dashboard
         </Link>
         <p className="mt-4 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400">Group</p>
-        <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
+        <h1 className="mt-2 text-2xl font-bold text-theme-text sm:text-3xl">
           {group?.groupName || group?.name || 'Untitled group'}
         </h1>
         {group?.description ? (
-          <p className="mt-1 text-sm text-slate-400">{group.description}</p>
+          <p className="mt-1 text-sm text-theme-subtext">{group.description}</p>
         ) : null}
       </div>
 
       {/* Stats row */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+        <div className="flex items-center gap-4 rounded-2xl border border-theme-border bg-theme-surface p-5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
             <Users size={20} />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Members</p>
-            <p className="mt-0.5 text-2xl font-bold text-white">{members.length}</p>
+            <p className="text-xs text-theme-subtext">Members</p>
+            <p className="mt-0.5 text-2xl font-bold text-theme-text">{members.length}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+        <div className="flex items-center gap-4 rounded-2xl border border-theme-border bg-theme-surface p-5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
             <Receipt size={20} />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Expenses</p>
-            <p className="mt-0.5 text-2xl font-bold text-white">{expenses.length}</p>
+            <p className="text-xs text-theme-subtext">Expenses</p>
+            <p className="mt-0.5 text-2xl font-bold text-theme-text">{expenses.length}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-700/60 text-slate-300">
+        <div className="flex items-center gap-4 rounded-2xl border border-theme-border bg-theme-surface p-5">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-theme-bg text-theme-subtext">
             <Wallet size={20} />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Invite code</p>
-            <p className="mt-0.5 font-mono text-sm font-semibold text-white">{group?.inviteCode || 'Private'}</p>
+            <p className="text-xs text-theme-subtext">Invite code</p>
+            <p className="mt-0.5 font-mono text-sm font-semibold text-theme-text">{group?.inviteCode || 'Private'}</p>
           </div>
         </div>
       </div>
 
-      {error ? <p className="rounded-2xl bg-amber-500/10 px-4 py-3 text-sm text-amber-300">{error}</p> : null}
+      {error ? <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-600">{error}</p> : null}
       {balanceError ? (
-        <div className="rounded-2xl bg-red-500/20 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-500">
           {balanceError}
         </div>
       ) : null}
       {successMessage ? (
-        <p className="rounded-2xl bg-emerald-500/10 px-4 py-3 text-sm text-emerald-300">{successMessage}</p>
+        <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-600">{successMessage}</p>
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <div className="space-y-6">
-          <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-lg shadow-slate-950/30">
+          <div className="rounded-3xl border border-theme-border bg-theme-surface p-6 shadow-lg shadow-theme-border/30">
             <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">Members</p>
-                <h2 className="mt-1 text-lg font-semibold text-white">Who's in this group</h2>
+                <h2 className="mt-1 text-lg font-semibold text-theme-text">Who's in this group</h2>
               </div>
               <button
                 type="button"
@@ -407,21 +407,21 @@ function GroupPage({ walletAddress }) {
                 return (
                   <div
                     key={memberId}
-                    className="flex flex-col items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 sm:flex-row sm:items-center sm:justify-between"
+                    className="flex flex-col items-start gap-3 rounded-2xl border border-theme-border bg-theme-bg p-4 sm:flex-row sm:items-center sm:justify-between"
                   >
                     <div className="min-w-0 w-full">
                       <div className="flex items-center gap-2">
-                        <p className="truncate font-medium text-white">{getEntityName(member)}</p>
+                        <p className="truncate font-medium text-theme-text">{getEntityName(member)}</p>
                         {isCreator && (
                           <span className="shrink-0 rounded-full bg-cyan-500/15 px-2 py-0.5 text-xs font-semibold text-cyan-400">
                             Admin
                           </span>
                         )}
                       </div>
-                      <p className="truncate text-sm text-slate-400">{member?.email || getWalletAddress(member) || 'Wallet pending'}</p>
+                      <p className="truncate text-sm text-theme-subtext">{member?.email || getWalletAddress(member) || 'Wallet pending'}</p>
                     </div>
                     <div className="flex shrink-0 items-center gap-2">
-                      <span className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
+                      <span className="rounded-full border border-theme-border px-3 py-1 text-xs text-theme-subtext">
                         {getWalletAddress(member) ? 'Wallet ready' : 'Wallet not linked'}
                       </span>
                       {isAdmin && !isCreator && (
@@ -452,27 +452,27 @@ function GroupPage({ walletAddress }) {
             />
           ) : null}
 
-          <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-lg shadow-slate-950/30">
+          <div className="rounded-3xl border border-theme-border bg-theme-surface p-6 shadow-lg shadow-theme-border/30">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">Expenses</p>
-            <h2 className="mt-1 text-lg font-semibold text-white">Shared costs</h2>
+            <h2 className="mt-1 text-lg font-semibold text-theme-text">Shared costs</h2>
 
             <div className="mt-6 space-y-3">
               {expenses.length ? (
                 expenses.map((expense, index) => (
                   <div
                     key={expense?.id || `${expense?.description}-${index}`}
-                    className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4"
+                    className="rounded-2xl border border-theme-border bg-theme-bg p-4"
                   >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                       <div className="min-w-0 w-full sm:w-auto">
-                        <p className="truncate text-base font-semibold text-white">{expense?.description || 'Shared expense'}</p>
-                        <p className="mt-1 truncate text-sm text-slate-400">
+                        <p className="truncate text-base font-semibold text-theme-text">{expense?.description || 'Shared expense'}</p>
+                        <p className="mt-1 truncate text-sm text-theme-subtext">
                           Paid by {expense?.payer?.name || expense?.paidByName || expense?.paidBy || 'Unknown payer'}
                         </p>
                       </div>
                       <div className="shrink-0 text-left sm:text-right">
-                        <p className="text-lg font-semibold text-white">{formatMoney(expense?.amount)}</p>
-                        <p className="text-sm text-slate-400">
+                        <p className="text-lg font-semibold text-theme-text">{formatMoney(expense?.amount)}</p>
+                        <p className="text-sm text-theme-subtext">
                           {expense?.splits?.length || expense?.splitBetween?.length || expense?.participantCount || 0} participants
                         </p>
                       </div>
@@ -480,18 +480,18 @@ function GroupPage({ walletAddress }) {
                   </div>
                 ))
               ) : (
-                <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 p-8 text-center">
-                  <p className="text-sm text-slate-400">No expenses yet. Add the first one and make accounting slightly less painful.</p>
+                <div className="rounded-2xl border border-dashed border-theme-border bg-theme-bg p-8 text-center">
+                  <p className="text-sm text-theme-subtext">No expenses yet. Add the first one and make accounting slightly less painful.</p>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-lg shadow-slate-950/30">
+        <div className="rounded-3xl border border-theme-border bg-theme-surface p-6 shadow-lg shadow-theme-border/30">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">Balances</p>
-          <h2 className="mt-1 text-lg font-semibold text-white">Settle with Algorand</h2>
-          <p className="mt-1.5 text-sm text-slate-400">
+          <h2 className="mt-1 text-lg font-semibold text-theme-text">Settle with Algorand</h2>
+          <p className="mt-1.5 text-sm text-theme-subtext">
             Each settlement signs a Testnet transaction with Pera Wallet and records the txId on-chain.
           </p>
 
@@ -510,42 +510,42 @@ function GroupPage({ walletAddress }) {
                 return (
                   <div
                     key={settleKey}
-                    className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5"
+                    className="rounded-2xl border border-theme-border bg-theme-bg p-5"
                   >
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-base font-semibold text-white">
+                        <p className="truncate text-base font-semibold text-theme-text">
                           {debtorName} owes {creditorName}
                         </p>
 
                         {/* Paid / Remaining breakdown */}
                         <div className="mt-2 flex flex-wrap gap-3">
                           <div className="inline-flex flex-wrap items-baseline gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-3 py-2">
-                            <span className="text-xs text-slate-400">Remaining:</span>
-                            <span className="text-lg font-bold text-white">{formatMoney(amount)}</span>
+                              <span className="text-xs text-theme-subtext">Remaining:</span>
+                                <span className="text-lg font-bold text-theme-text">{formatMoney(amount)}</span>
                             {algoPriceINR && (
                               <>
-                                <span className="text-sm text-slate-400">≈</span>
-                                <span className="text-lg font-bold text-cyan-300">
+                                <span className="text-sm text-theme-subtext">≈</span>
+                                <span className="text-lg font-bold text-cyan-500">
                                   {(amount / algoPriceINR).toFixed(4)} ALGO
                                 </span>
-                                <span className="text-xs text-slate-500">(@ ₹{algoPriceINR}/ALGO)</span>
+                                <span className="text-xs text-theme-subtext">(@ ₹{algoPriceINR}/ALGO)</span>
                               </>
                             )}
                           </div>
                           {paidAmount > 0 && (
                             <div className="inline-flex items-baseline gap-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 px-3 py-2">
-                              <span className="text-xs text-slate-400">Paid:</span>
-                              <span className="text-sm font-semibold text-emerald-400">{formatMoney(paidAmount)}</span>
-                              <span className="text-xs text-slate-500">of {formatMoney(totalAmount)}</span>
+                              <span className="text-xs text-theme-subtext">Paid:</span>
+                              <span className="text-sm font-semibold text-emerald-600">{formatMoney(paidAmount)}</span>
+                              <span className="text-xs text-theme-subtext">of {formatMoney(totalAmount)}</span>
                             </div>
                           )}
                         </div>
 
-                        <p className="mt-3 truncate text-xs text-slate-500">
+                        <p className="mt-3 truncate text-xs text-theme-subtext">
                           Recipient: {creditorWallet || 'Missing wallet address'}
                         </p>
-                        <p className="mt-1 truncate text-xs text-slate-500">
+                        <p className="mt-1 truncate text-xs text-theme-subtext">
                           Sender: {debtorWallet || walletAddress || 'Connect wallet to proceed'}
                         </p>
                       </div>
@@ -553,7 +553,7 @@ function GroupPage({ walletAddress }) {
                       <div className="flex shrink-0 flex-col items-start lg:items-end gap-3">
                         {/* Custom payment amount input */}
                         <div className="w-full lg:w-44">
-                          <label className="mb-1 block text-xs text-slate-400">Pay amount (₹)</label>
+                          <label className="mb-1 block text-xs text-theme-subtext">Pay amount (₹)</label>
                           <input
                             type="number"
                             min="0.01"
@@ -563,20 +563,20 @@ function GroupPage({ walletAddress }) {
                             onChange={(e) =>
                               setPaymentAmounts((prev) => ({ ...prev, [settleKey]: e.target.value }))
                             }
-                            className="w-full rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
+                            className="w-full rounded-xl border border-theme-border bg-theme-bg px-3 py-2 text-sm text-theme-text placeholder-theme-subtext focus:border-cyan-500 focus:outline-none"
                             placeholder={amount.toFixed(2)}
                           />
                           {paymentNum > 0 && paymentNum < amount && (
-                            <p className="mt-1 text-xs text-amber-400">
+                            <p className="mt-1 text-xs text-amber-600">
                               Remaining after: {formatMoney(amount - paymentNum)}
                             </p>
                           )}
                         </div>
 
                         {algoPriceINR && paymentNum > 0 && (
-                          <p className="text-xs text-slate-400">
+                          <p className="text-xs text-theme-subtext">
                             Wallet will show{' '}
-                            <span className="font-semibold text-cyan-300">
+                            <span className="font-semibold text-cyan-600">
                               {(paymentNum / algoPriceINR).toFixed(4)} ALGO
                             </span>
                           </p>
@@ -595,7 +595,7 @@ function GroupPage({ walletAddress }) {
                               ? walletBalance < paymentNum / algoPriceINR + 0.001
                               : false)
                           }
-                          className="inline-flex w-full lg:w-auto items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex w-full lg:w-auto items-center justify-center rounded-2xl bg-theme-surface px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {settlingId === settleKey
                             ? 'Settling...'
@@ -609,8 +609,8 @@ function GroupPage({ walletAddress }) {
                 );
               })
             ) : (
-              <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-950/50 p-8 text-center">
-                <p className="text-sm text-slate-400">All balances settled — everyone is square!</p>
+                <div className="rounded-2xl border border-dashed border-theme-border bg-theme-bg p-8 text-center">
+                <p className="text-sm text-theme-subtext">All balances settled — everyone is square!</p>
               </div>
             )}
           </div>
@@ -621,8 +621,8 @@ function GroupPage({ walletAddress }) {
       {isAdmin && (
         <div className="rounded-3xl border border-red-500/20 bg-red-500/5 p-6">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-red-400">Admin controls</p>
-          <h2 className="mt-1 text-lg font-semibold text-white">Danger zone</h2>
-          <p className="mt-1.5 text-sm text-slate-400">
+          <h2 className="mt-1 text-lg font-semibold text-theme-text">Danger zone</h2>
+          <p className="mt-1.5 text-sm text-theme-subtext">
             {allSettled
               ? 'All balances are settled. You may delete this group.'
               : 'The group can only be deleted once all member balances are fully settled.'}

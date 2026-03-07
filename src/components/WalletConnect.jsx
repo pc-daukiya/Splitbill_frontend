@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import { connectWallet, disconnectWallet } from '../services/algorand';
 import peraWalletService from '../services/perawallet';
 
@@ -76,13 +76,13 @@ function WalletConnect({ address, onConnect, onDisconnect }) {
   };
 
   return (
-    <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg shadow-slate-950/30 backdrop-blur">
+    <div className="rounded-2xl border border-theme-border bg-theme-surface p-4 shadow-lg shadow-theme-border/30 backdrop-blur">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">
             Pera Wallet
           </p>
-          <p className="mt-1 text-sm text-slate-300">
+          <p className="mt-1 text-sm text-theme-subtext">
             {accountAddress
               ? `Connected: ${shortenAddress(accountAddress)}`
               : 'Connect an Algorand Testnet account to settle balances.'}
@@ -110,7 +110,7 @@ function WalletConnect({ address, onConnect, onDisconnect }) {
         )}
       </div>
 
-      {error ? <p className="mt-3 text-sm text-amber-300">{error}</p> : null}
+      {error ? <p className="mt-3 text-sm text-amber-600">{error}</p> : null}
     </div>
   );
 }

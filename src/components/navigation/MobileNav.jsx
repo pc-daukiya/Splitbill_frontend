@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { LayoutDashboard, Wallet, X } from 'lucide-react';
 import { useWallet } from '../../context/WalletContext';
@@ -6,7 +6,7 @@ import WalletConnect from '../WalletConnect';
 
 const linkStyle = (isActive) =>
   `flex flex-1 flex-col items-center justify-center gap-1 py-2.5 text-[10px] font-medium transition-colors ${
-    isActive ? 'text-cyan-400' : 'text-slate-500 hover:text-slate-300'
+      isActive ? 'text-cyan-400' : 'text-theme-subtext hover:text-theme-subtext'
   }`;
 
 export default function MobileNav() {
@@ -18,15 +18,15 @@ export default function MobileNav() {
       {isWalletOpen && (
         <div className="fixed inset-0 z-50 flex flex-col justify-end md:hidden">
           <div 
-            className="absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" 
+            className="absolute inset-0 bg-gray-900/70 backdrop-blur-sm transition-opacity" 
             onClick={() => setIsWalletOpen(false)} 
           />
-          <div className="relative rounded-t-3xl border-t border-slate-800 bg-[#0B0F1A] p-6 pb-12 shadow-2xl">
+          <div className="relative rounded-t-3xl border-t border-theme-border bg-theme-surface p-6 pb-12 shadow-2xl">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-white">Wallet</h3>
+              <h3 className="text-lg font-semibold text-theme-text">Wallet</h3>
               <button 
                 onClick={() => setIsWalletOpen(false)}
-                className="rounded-full bg-slate-900 p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
+                className="rounded-full bg-theme-bg p-2 text-theme-subtext transition hover:bg-theme-border hover:text-theme-subtext"
               >
                 <X size={16} />
               </button>
@@ -41,7 +41,7 @@ export default function MobileNav() {
       )}
 
       <nav 
-        className="fixed inset-x-0 bottom-0 z-40 flex border-t border-slate-800 bg-slate-950/95 backdrop-blur-xl md:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 flex border-t border-theme-border bg-theme-surface/95 backdrop-blur-xl md:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <NavLink 

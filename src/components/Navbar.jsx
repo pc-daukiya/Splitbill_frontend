@@ -1,7 +1,8 @@
-import { Link, useLocation } from 'react-router-dom';
+﻿import { Link, useLocation } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import { useWallet } from '../context/WalletContext';
 import WalletConnect from './WalletConnect';
+import ThemeSwitcher from './ThemeSwitcher';
 
 const PAGE_TITLES = {
   '/dashboard': 'Dashboard',
@@ -18,20 +19,21 @@ function Navbar() {
     'SplitBill';
 
   return (
-    <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-slate-800/60 bg-[#0B0F1A]/80 px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-theme-border/80 bg-theme-surface/80 px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8">
       {/* Mobile logo — sidebar is hidden on mobile */}
       <Link to="/dashboard" className="flex items-center gap-2.5 md:hidden">
         <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500 text-sm font-black text-slate-950">
           ₳
         </div>
-        <span className="text-sm font-bold text-white">SplitBill</span>
+        <span className="text-sm font-bold text-theme-text">SplitBill</span>
       </Link>
 
       {/* Desktop page title */}
-      <h2 className="hidden text-base font-semibold text-white md:block">{title}</h2>
+      <h2 className="hidden text-base font-semibold text-theme-text md:block">{title}</h2>
 
-      {/* Wallet connect — full on desktop, avatar only on mobile */}
-      <div className="ml-auto hidden md:block">
+      {/* Desktop: theme switcher + wallet connect */}
+      <div className="ml-auto hidden md:flex md:items-center md:gap-3">
+        <ThemeSwitcher />
         <WalletConnect
           address={walletAddress}
           onConnect={onWalletConnected}
@@ -45,10 +47,10 @@ function Navbar() {
           <img
             src={user.picture}
             alt={user?.name || 'User'}
-            className="h-8 w-8 rounded-xl border border-slate-700 object-cover"
+            className="h-8 w-8 rounded-xl border border-theme-border object-cover"
           />
         ) : (
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-700 text-xs font-bold text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-theme-border text-xs font-bold text-theme-text">
             {(user?.name || 'U')[0].toUpperCase()}
           </div>
         )}

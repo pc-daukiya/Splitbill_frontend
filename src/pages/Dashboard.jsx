@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+﻿import { useCallback, useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Users, Receipt, RefreshCw, Plus, LogIn } from 'lucide-react';
 import GroupCard from '../components/GroupCard';
@@ -149,41 +149,41 @@ function Dashboard() {
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-cyan-400">
           Dashboard
         </p>
-        <h1 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
+        <h1 className="mt-2 text-2xl font-bold text-theme-text sm:text-3xl">
           Welcome back{user?.given_name ? `, ${user.given_name}` : ''} 👋
         </h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-theme-subtext">
           Track your shared expenses and settle on Algorand.
         </p>
       </div>
 
       {/* Stats row */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+        <div className="flex items-center gap-4 rounded-2xl border border-theme-border bg-theme-surface p-5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
             <Users size={20} />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Your groups</p>
-            <p className="mt-0.5 text-2xl font-bold text-white">{groups.length}</p>
+            <p className="text-xs text-theme-subtext">Your groups</p>
+            <p className="mt-0.5 text-2xl font-bold text-theme-text">{groups.length}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+        <div className="flex items-center gap-4 rounded-2xl border border-theme-border bg-theme-surface p-5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-400">
             <Receipt size={20} />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Total expenses</p>
-            <p className="mt-0.5 text-2xl font-bold text-white">{totalExpenses}</p>
+            <p className="text-xs text-theme-subtext">Total expenses</p>
+            <p className="mt-0.5 text-2xl font-bold text-theme-text">{totalExpenses}</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+        <div className="flex items-center gap-4 rounded-2xl border border-theme-border bg-theme-surface p-5">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400">
             <Users size={20} />
           </div>
           <div>
-            <p className="text-xs text-slate-400">Active members</p>
-            <p className="mt-0.5 text-2xl font-bold text-white">{totalMembers}</p>
+            <p className="text-xs text-theme-subtext">Active members</p>
+            <p className="mt-0.5 text-2xl font-bold text-theme-text">{totalMembers}</p>
           </div>
         </div>
       </div>
@@ -195,18 +195,18 @@ function Dashboard() {
           {/* Create group */}
           <form
             onSubmit={handleCreateGroup}
-            className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-lg shadow-slate-950/30"
+            className="rounded-3xl border border-theme-border bg-theme-surface p-6 shadow-lg shadow-theme-border/30"
           >
             <div className="flex items-center gap-2.5">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400">
                 <Plus size={16} />
               </div>
-              <h2 className="text-base font-semibold text-white">New group</h2>
+              <h2 className="text-base font-semibold text-theme-text">New group</h2>
             </div>
             <div className="mt-5 space-y-4">
               <div>
                 <label
-                  className="mb-1.5 block text-xs font-medium text-slate-300"
+                  className="mb-1.5 block text-xs font-medium text-theme-subtext"
                   htmlFor="group-name"
                 >
                   Group name
@@ -217,15 +217,15 @@ function Dashboard() {
                   value={createForm.name}
                   onChange={handleCreateChange('name')}
                   placeholder="Goa trip, office lunch…"
-                  className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400"
+                  className="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-sm text-theme-text outline-none transition placeholder:text-theme-subtext focus:border-cyan-400"
                 />
               </div>
               <div>
                 <label
-                  className="mb-1.5 block text-xs font-medium text-slate-300"
+                  className="mb-1.5 block text-xs font-medium text-theme-subtext"
                   htmlFor="group-description"
                 >
-                  Description <span className="text-slate-600">(optional)</span>
+                  Description <span className="text-theme-subtext">(optional)</span>
                 </label>
                 <textarea
                   id="group-description"
@@ -233,7 +233,7 @@ function Dashboard() {
                   onChange={handleCreateChange('description')}
                   rows="3"
                   placeholder="What's this group for?"
-                  className="w-full resize-none rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-600 focus:border-cyan-400"
+                  className="w-full resize-none rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-sm text-theme-text outline-none transition placeholder:text-theme-subtext focus:border-cyan-400"
                 />
               </div>
             </div>
@@ -249,17 +249,17 @@ function Dashboard() {
           {/* Join group */}
           <form
             onSubmit={handleJoinGroup}
-            className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-lg shadow-slate-950/30"
+            className="rounded-3xl border border-theme-border bg-theme-surface p-6 shadow-lg shadow-theme-border/30"
           >
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-slate-700/60 text-slate-300">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-theme-bg text-theme-subtext">
                 <LogIn size={16} />
               </div>
-              <h2 className="text-base font-semibold text-white">Join a group</h2>
+              <h2 className="text-base font-semibold text-theme-text">Join a group</h2>
             </div>
             <div className="mt-5">
               <label
-                className="mb-1.5 block text-xs font-medium text-slate-300"
+                className="mb-1.5 block text-xs font-medium text-theme-subtext"
                 htmlFor="invite-code"
               >
                 Invite code
@@ -270,13 +270,13 @@ function Dashboard() {
                 value={inviteCode}
                 onChange={(event) => setInviteCode(event.target.value)}
                 placeholder="SPLIT-ALGO-2026"
-                className="w-full rounded-xl border border-slate-700 bg-slate-950/70 px-4 py-3 text-sm uppercase tracking-[0.15em] text-white outline-none transition placeholder:normal-case placeholder:tracking-normal placeholder:text-slate-600 focus:border-cyan-400"
+                className="w-full rounded-xl border border-theme-border bg-theme-bg px-4 py-3 text-sm uppercase tracking-[0.15em] text-theme-text outline-none transition placeholder:normal-case placeholder:tracking-normal placeholder:text-theme-subtext focus:border-cyan-400"
               />
             </div>
             <button
               type="submit"
               disabled={joining}
-              className="mt-5 inline-flex w-full items-center justify-center rounded-xl border border-slate-700 px-5 py-3 text-sm font-semibold text-white transition hover:border-cyan-400/60 hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-70"
+              className="mt-5 inline-flex w-full items-center justify-center rounded-xl border border-theme-border px-5 py-3 text-sm font-semibold text-theme-subtext transition hover:border-cyan-400/60 hover:text-cyan-600 disabled:cursor-not-allowed disabled:opacity-70"
             >
               {joining ? 'Joining…' : 'Join group'}
             </button>
@@ -284,18 +284,18 @@ function Dashboard() {
         </div>
 
         {/* Right: Groups list */}
-        <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-lg shadow-slate-950/30">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-5">
+          <div className="rounded-3xl border border-theme-border bg-theme-surface p-6 shadow-lg shadow-theme-border/30">
+          <div className="flex items-center justify-between border-b border-theme-border pb-5">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">
                 Your groups
               </p>
-              <h2 className="mt-1 text-lg font-semibold text-white">Everything you're tracking</h2>
+              <h2 className="mt-1 text-lg font-semibold text-theme-text">Everything you're tracking</h2>
             </div>
             <button
               type="button"
               onClick={loadGroups}
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-700 px-3 py-2 text-xs font-medium text-slate-300 transition hover:border-slate-500 hover:text-white"
+              className="inline-flex items-center gap-2 rounded-xl border border-theme-border px-3 py-2 text-xs font-medium text-theme-subtext transition hover:border-theme-subtext hover:text-theme-text"
             >
               <RefreshCw size={13} />
               Refresh
@@ -303,7 +303,7 @@ function Dashboard() {
           </div>
 
           {error ? (
-            <p className="mt-4 rounded-xl bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+            <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-600">
               {error}
             </p>
           ) : null}
@@ -322,12 +322,12 @@ function Dashboard() {
               ))}
             </div>
           ) : (
-            <div className="mt-6 rounded-3xl border border-dashed border-slate-700 bg-slate-950/50 p-10 text-center">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-800">
-                <Users size={24} className="text-slate-500" />
+            <div className="mt-6 rounded-3xl border border-dashed border-theme-border bg-theme-bg p-10 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-theme-bg">
+                <Users size={24} className="text-theme-subtext" />
               </div>
-              <h3 className="text-base font-semibold text-white">No groups yet</h3>
-              <p className="mt-2 text-sm text-slate-400">
+              <h3 className="text-base font-semibold text-theme-text">No groups yet</h3>
+              <p className="mt-2 text-sm text-theme-subtext">
                 Create your first split and invite the squad.
               </p>
             </div>
