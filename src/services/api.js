@@ -19,7 +19,7 @@ const normalizeError = (error) => {
 
 export const apiClient = axios.create({
   baseURL: apiBaseUrl,
-  timeout: 15000,
+  timeout: 30000,
 });
 
 export const getGroups = async (token) => {
