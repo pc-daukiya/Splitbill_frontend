@@ -24,6 +24,23 @@ export const disconnectWallet = async () => {
   await peraWalletService.disconnect();
 };
 
+// ─── Account helpers ────────────────────────────────────────────────────────
+
+/**
+ * Returns the ALGO balance of the given address (0 if not found).
+ */
+export const getAccountBalance = async (address) => {
+  if (!address) return null;
+  try {
+    const accountInfo = await algodClient.accountInformation(address).do();
+    const raw = accountInfo.amount ?? accountInfo['amount'];
+    return Number(raw) / 1_000_000; // microAlgo → ALGO
+  } catch {
+    // Return null so callers treat balance as unknown rather than zero
+    return null;
+  }
+};
+
 // ─── Payment ─────────────────────────────────────────────────────────────────
 
 export const sendPayment = async ({ sender, receiver, amount, note }) => {
@@ -47,6 +64,15 @@ export const sendPayment = async ({ sender, receiver, amount, note }) => {
   console.log('[Algorand] INR entered:', amount, '₹');
   console.log('[Algorand] Current ALGO price INR: ₹' + priceUsed);
   console.log('[Algorand] Converted ALGO:', algoAmount, 'ALGO');
+
+  // ── Balance pre-flight check ──────────────────────────────────────────────
+  const senderBalance = await getAccountBalance(sender);
+  const requiredAlgo = algoAmount + 0.001; // payment + standard min fee
+  console.log('[Algorand] Sender balance:', senderBalance, 'ALGO | Required:', requiredAlgo, 'ALGO');
+  // Only block if balance is a known number AND confirmed insufficient
+  if (senderBalance !== null && senderBalance < requiredAlgo) {
+    throw new Error('INSUFFICIENT_BALANCE');
+  }
 
   console.log('[Algorand] Fetching transaction params from Testnet...');
   const suggestedParams = await algodClient.getTransactionParams().do();
