@@ -1,0 +1,117 @@
+import axios from 'axios';
+
+const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8080';
+
+const buildConfig = (token) => ({
+  headers: token
+    ? {
+        Authorization: `Bearer ${token}`,
+      }
+    : {},
+});
+
+const normalizeError = (error) => {
+  const fallbackMessage = 'Something went sideways while talking to the API.';
+  const message = error?.response?.data?.message || error?.message || fallbackMessage;
+
+  return new Error(message);
+};
+
+export const apiClient = axios.create({
+  baseURL: apiBaseUrl,
+  timeout: 15000,
+});
+
+export const getGroups = async (token) => {
+  try {
+    const response = await apiClient.get('/api/groups', buildConfig(token));
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
+
+export const createGroup = async (payload, token) => {
+  try {
+    const response = await apiClient.post('/api/groups', payload, buildConfig(token));
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
+
+export const joinGroup = async (payload, token) => {
+  try {
+    const response = await apiClient.post('/api/groups/join', payload, buildConfig(token));
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
+
+export const getGroupById = async (groupId, token) => {
+  try {
+    const response = await apiClient.get(`/api/groups/${groupId}`, buildConfig(token));
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
+
+export const getGroupExpenses = async (groupId, token) => {
+  try {
+    const response = await apiClient.get(`/api/groups/${groupId}/expenses`, buildConfig(token));
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
+
+export const getGroupBalances = async (groupId, token) => {
+  try {
+    const response = await apiClient.get(`/api/groups/${groupId}/balances`, buildConfig(token));
+    return Array.isArray(response.data) ? response.data : [];
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
+
+export const updateWalletAddress = async (userId, walletAddress, token) => {
+  try {
+    const response = await apiClient.patch(
+      `/api/users/${userId}/wallet`,
+      { walletAddress },
+      buildConfig(token),
+    );
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
+
+export const syncUser = async (payload, token) => {
+  try {
+    const response = await apiClient.post('/api/users/sync', payload, buildConfig(token));
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
+
+export const createExpense = async (payload, token) => {
+  try {
+    const response = await apiClient.post('/api/expenses', payload, buildConfig(token));
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
+
+export const createSettlement = async (payload, token) => {
+  try {
+    const response = await apiClient.post('/api/settlements', payload, buildConfig(token));
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
