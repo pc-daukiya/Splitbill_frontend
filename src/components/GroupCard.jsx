@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 const formatCurrency = (value = 0) => {
   const amount = Number(value) || 0;
 
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
@@ -42,7 +44,7 @@ function GroupCard({ group }) {
         </div>
         <div className="rounded-2xl bg-slate-950/70 p-3">
           <dt className="text-slate-400">Total spent</dt>
-          <dd className="mt-1 text-lg font-semibold text-white">${formatCurrency(totalSpent)}</dd>
+          <dd className="mt-1 text-lg font-semibold text-white">{formatCurrency(totalSpent)}</dd>
         </div>
       </dl>
 

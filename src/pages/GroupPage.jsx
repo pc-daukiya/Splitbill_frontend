@@ -5,7 +5,9 @@ import ExpenseForm from '../components/ExpenseForm';
 import { checkTransaction, sendPayment } from '../services/algorand';
 import { createExpense, createSettlement, getGroupBalances, getGroupById, getGroupExpenses } from '../services/api';
 
-const currencyFormatter = new Intl.NumberFormat('en-US', {
+const currencyFormatter = new Intl.NumberFormat('en-IN', {
+  style: 'currency',
+  currency: 'INR',
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
@@ -20,10 +22,8 @@ const getWalletAddress = (entity) =>
   entity?.walletAddress || entity?.address || entity?.account || entity?.algorandAddress || '';
 
 const normalizeMembers = (group) => (Array.isArray(group?.members) ? group.members : []);
-const normalizeExpenses = (group) => (Array.isArray(group?.expenses) ? group.expenses : []);
-const normalizeBalances = (group) => (Array.isArray(group?.balances) ? group.balances : []);
 
-const formatMoney = (value) => `$${currencyFormatter.format(Number(value) || 0)}`;
+const formatMoney = (value) => currencyFormatter.format(Number(value) || 0);
 
 const resolveBalanceParties = (balance) => {
   const debtor = balance?.debtor || balance?.from || balance?.payer || balance?.fromMember || {};
