@@ -1,9 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  connectWallet,
-  disconnectWallet,
-  restoreWalletSession,
-} from '../services/algorand';
+import { connectWallet, disconnectWallet } from '../services/algorand';
 import peraWalletService from '../services/perawallet';
 
 const shortenAddress = (address = '') => {
