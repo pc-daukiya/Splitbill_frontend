@@ -14,8 +14,16 @@ function ProtectedRoute({ children }) {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0B0F1A]">
-        <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-700 border-t-cyan-400" />
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#0B0F1A]">
+        <div className="relative flex h-16 w-16 items-center justify-center">
+          <div className="absolute h-full w-full animate-ping rounded-2xl bg-cyan-500/20" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-500 text-xl font-black text-slate-950 shadow-lg shadow-cyan-500/30">
+            ₳
+          </div>
+        </div>
+        <p className="mt-4 animate-pulse text-sm font-medium tracking-wide text-cyan-400">
+          Loading your identity...
+        </p>
       </div>
     );
   }

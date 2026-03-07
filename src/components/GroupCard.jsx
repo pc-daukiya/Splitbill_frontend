@@ -19,16 +19,16 @@ function GroupCard({ group }) {
   return (
     <article className="group rounded-3xl border border-slate-800 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/30 transition hover:-translate-y-1 hover:border-cyan-400/40 hover:shadow-cyan-950/30">
       <div className="flex items-start justify-between gap-4">
-        <div>
+        <div className="min-w-0 pr-2">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">
             Group
           </p>
-          <h3 className="mt-2 text-xl font-semibold text-white">{group?.groupName || group?.name || 'Untitled group'}</h3>
-          <p className="mt-2 text-sm text-slate-400">
+          <h3 className="mt-2 truncate text-xl font-semibold text-white">{group?.groupName || group?.name || 'Untitled group'}</h3>
+          <p className="mt-2 line-clamp-2 text-sm text-slate-400">
             {group?.description || 'Track group expenses and settle balances on Algorand Testnet.'}
           </p>
         </div>
-        <span className="rounded-full border border-slate-700 px-3 py-1 text-xs font-medium text-slate-300">
+        <span className="shrink-0 rounded-full border border-slate-700 px-3 py-1 text-xs font-medium text-slate-300">
           {group?.inviteCode ? `Invite: ${group.inviteCode}` : 'Private'}
         </span>
       </div>

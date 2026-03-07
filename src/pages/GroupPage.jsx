@@ -199,15 +199,25 @@ function GroupPage({ walletAddress }) {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
+      <div className="space-y-8 animate-pulse">
+        <div className="space-y-3">
+          <div className="h-4 w-32 rounded bg-slate-800" />
+          <div className="h-8 w-64 rounded-lg bg-slate-800" />
         </div>
-        <div className="grid gap-6 xl:grid-cols-[1fr_1fr]">
-          <SkeletonCard />
-          <SkeletonCard />
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="flex h-24 items-center gap-4 rounded-2xl border border-slate-800 bg-slate-900/70 p-5">
+              <div className="h-11 w-11 rounded-xl bg-slate-800" />
+              <div className="space-y-2">
+                <div className="h-3 w-16 rounded bg-slate-800" />
+                <div className="h-5 w-10 rounded bg-slate-800" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+          <div className="h-80 rounded-3xl border border-slate-800 bg-slate-900/80 p-6" />
+          <div className="h-80 rounded-3xl border border-slate-800 bg-slate-900/80 p-6" />
         </div>
       </div>
     );
@@ -289,7 +299,7 @@ function GroupPage({ walletAddress }) {
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <div className="space-y-6">
           <div className="rounded-3xl border border-slate-800 bg-slate-900/80 p-6 shadow-lg shadow-slate-950/30">
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">Members</p>
                 <h2 className="mt-1 text-lg font-semibold text-white">Who's in this group</h2>
@@ -297,7 +307,7 @@ function GroupPage({ walletAddress }) {
               <button
                 type="button"
                 onClick={() => setShowExpenseForm((currentValue) => !currentValue)}
-                className="inline-flex items-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-cyan-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400"
               >
                 <Plus size={14} />
                 {showExpenseForm ? 'Hide' : 'Add expense'}
@@ -308,13 +318,13 @@ function GroupPage({ walletAddress }) {
               {members.map((member) => (
                 <div
                   key={getEntityId(member)}
-                  className="flex items-center justify-between rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3"
+                  className="flex flex-col items-start gap-3 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 sm:flex-row sm:items-center sm:justify-between"
                 >
-                  <div>
-                    <p className="font-medium text-white">{getEntityName(member)}</p>
-                    <p className="text-sm text-slate-400">{member?.email || getWalletAddress(member) || 'Wallet pending'}</p>
+                  <div className="min-w-0 w-full">
+                    <p className="truncate font-medium text-white">{getEntityName(member)}</p>
+                    <p className="truncate text-sm text-slate-400">{member?.email || getWalletAddress(member) || 'Wallet pending'}</p>
                   </div>
-                  <span className="rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
+                  <span className="shrink-0 rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
                     {getWalletAddress(member) ? 'Wallet ready' : 'Wallet not linked'}
                   </span>
                 </div>
@@ -342,14 +352,14 @@ function GroupPage({ walletAddress }) {
                     key={expense?.id || `${expense?.description}-${index}`}
                     className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4"
                   >
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                      <div>
-                        <p className="text-base font-semibold text-white">{expense?.description || 'Shared expense'}</p>
-                        <p className="mt-1 text-sm text-slate-400">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0 w-full sm:w-auto">
+                        <p className="truncate text-base font-semibold text-white">{expense?.description || 'Shared expense'}</p>
+                        <p className="mt-1 truncate text-sm text-slate-400">
                           Paid by {expense?.payer?.name || expense?.paidByName || expense?.paidBy || 'Unknown payer'}
                         </p>
                       </div>
-                      <div className="text-left sm:text-right">
+                      <div className="shrink-0 text-left sm:text-right">
                         <p className="text-lg font-semibold text-white">{formatMoney(expense?.amount)}</p>
                         <p className="text-sm text-slate-400">
                           {expense?.splits?.length || expense?.splitBetween?.length || expense?.participantCount || 0} participants
@@ -386,8 +396,8 @@ function GroupPage({ walletAddress }) {
                     className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5"
                   >
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                      <div className="flex-1">
-                        <p className="text-base font-semibold text-white">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-base font-semibold text-white">
                           {debtorName} owes {creditorName}
                         </p>
 
@@ -400,22 +410,22 @@ function GroupPage({ walletAddress }) {
                               <span className="text-lg font-bold text-cyan-300">
                                 {(amount / algoPriceINR).toFixed(4)} ALGO
                               </span>
-                              <span className="text-xs text-slate-500">(@ ₹{algoPriceINR}/ALGO · live rate)</span>
+                              <span className="text-xs text-slate-500">(@ ₹{algoPriceINR}/ALGO)</span>
                             </>
                           ) : (
                             <span className="text-xs text-slate-500">fetching ALGO price...</span>
                           )}
                         </div>
 
-                        <p className="mt-3 text-xs text-slate-500">
-                          Recipient wallet: {creditorWallet || 'Missing wallet address'}
+                        <p className="mt-3 truncate text-xs text-slate-500">
+                          Recipient: {creditorWallet || 'Missing wallet address'}
                         </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          Sender wallet: {debtorWallet || walletAddress || 'Connect wallet to proceed'}
+                        <p className="mt-1 truncate text-xs text-slate-500">
+                          Sender: {debtorWallet || walletAddress || 'Connect wallet to proceed'}
                         </p>
                       </div>
 
-                      <div className="flex flex-col items-end gap-2">
+                      <div className="flex shrink-0 flex-col items-start lg:items-end gap-2">
                         {algoPriceINR ? (
                           <p className="text-xs text-slate-400">
                             Wallet will show <span className="font-semibold text-cyan-300">{(amount / algoPriceINR).toFixed(4)} ALGO</span>
@@ -425,7 +435,7 @@ function GroupPage({ walletAddress }) {
                           type="button"
                           onClick={() => handleSettlePayment(balance, index)}
                           disabled={!walletAddress || !creditorWallet || settlingId === settleKey}
-                          className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex w-full lg:w-auto items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           {settlingId === settleKey
                             ? 'Settling...'
