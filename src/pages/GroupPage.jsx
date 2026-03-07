@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router-dom';
 import ExpenseForm from '../components/ExpenseForm';
 import { checkTransaction, sendPayment } from '../services/algorand';
 import { createExpense, createSettlement, getGroupBalances, getGroupById, getGroupExpenses } from '../services/api';
+import { getAlgoPriceINR } from '../services/algoPrice';
 
 const currencyFormatter = new Intl.NumberFormat('en-IN', {
   style: 'currency',
@@ -60,6 +61,12 @@ function GroupPage({ walletAddress }) {
   const [successMessage, setSuccessMessage] = useState('');
   const [expenses, setExpenses] = useState([]);
   const [balances, setBalances] = useState([]);
+  const [algoPriceINR, setAlgoPriceINR] = useState(null);
+
+  // Fetch live ALGO/INR price once on mount for the conversion preview
+  useEffect(() => {
+    getAlgoPriceINR().then(setAlgoPriceINR).catch(() => setAlgoPriceINR(80));
+  }, []);
 
   const getToken = useCallback(async () => {
     try {
@@ -353,6 +360,12 @@ function GroupPage({ walletAddress }) {
                           {debtorName} owes {creditorName}
                         </p>
                         <p className="mt-1 text-sm text-slate-400">Amount: {formatMoney(amount)}</p>
+                        {algoPriceINR ? (
+                          <p className="mt-1 text-xs font-medium text-cyan-400">
+                            ≈ {(amount / algoPriceINR).toFixed(4)} ALGO
+                            <span className="ml-1 text-slate-500">(@ ₹{algoPriceINR}/ALGO)</span>
+                          </p>
+                        ) : null}
                         <p className="mt-2 text-xs text-slate-500">
                           Recipient wallet: {creditorWallet || 'Missing wallet address'}
                         </p>

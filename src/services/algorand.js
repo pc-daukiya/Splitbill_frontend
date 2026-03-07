@@ -1,5 +1,6 @@
 import algosdk from 'algosdk';
 import peraWalletService from './perawallet';
+import { convertINRToAlgo } from './algoPrice';
 
 // Algorand TestNet endpoints (never use MainNet here)
 const algodUrl = process.env.REACT_APP_ALGOD_URL || 'https://testnet-api.algonode.cloud';
@@ -23,21 +24,6 @@ export const disconnectWallet = async () => {
   await peraWalletService.disconnect();
 };
 
-// ─── Currency conversion ──────────────────────────────────────────────────────
-
-/**
- * Convert an INR amount to ALGO for on-chain transactions.
- * Expenses are stored in INR; Algorand requires ALGO units.
- * The rate is kept as a constant here — update ALGO_PRICE_INR if the live rate
- * changes significantly during your demo/hackathon.
- */
-const ALGO_PRICE_INR = 80; // 1 ALGO ≈ ₹80
-
-const convertINRToAlgo = (inrAmount) => {
-  const algo = Number(inrAmount) / ALGO_PRICE_INR;
-  return algo;
-};
-
 // ─── Payment ─────────────────────────────────────────────────────────────────
 
 export const sendPayment = async ({ sender, receiver, amount, note }) => {
@@ -56,9 +42,10 @@ export const sendPayment = async ({ sender, receiver, amount, note }) => {
     throw new Error('Payment amount must be greater than zero.');
   }
 
-  // Convert INR → ALGO (only for the on-chain transaction; DB values stay in INR)
-  const algoAmount = convertINRToAlgo(amount);
-  console.log('[Algorand] INR amount:', amount, '₹');
+  // Fetch live ALGO/INR price and convert (DB stays in INR — conversion only for the txn)
+  const { algoAmount, priceUsed } = await convertINRToAlgo(amount);
+  console.log('[Algorand] INR entered:', amount, '₹');
+  console.log('[Algorand] Current ALGO price INR: ₹' + priceUsed);
   console.log('[Algorand] Converted ALGO:', algoAmount, 'ALGO');
 
   console.log('[Algorand] Fetching transaction params from Testnet...');
@@ -81,7 +68,7 @@ export const sendPayment = async ({ sender, receiver, amount, note }) => {
   console.log('[Algorand] Transaction built — requesting Pera Wallet signature...');
   console.log('[Algorand] Sender wallet:', sender);
   console.log('[Algorand] Receiver wallet:', receiver);
-  console.log('[Algorand] Sending:', algoAmount, 'ALGO (₹' + amount + ' INR)');
+  console.log('[Algorand] Sending:', algoAmount.toFixed(6), 'ALGO (₹' + amount + ' @ ₹' + priceUsed + '/ALGO)');
 
   let signedTransactions;
   try {
