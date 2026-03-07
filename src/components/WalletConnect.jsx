@@ -4,6 +4,7 @@ import {
   disconnectWallet,
   restoreWalletSession,
 } from '../services/algorand';
+import peraWalletService from '../services/perawallet';
 
 const shortenAddress = (address = '') => {
   if (!address) {
@@ -25,9 +26,10 @@ function WalletConnect({ address, onConnect, onDisconnect }) {
   useEffect(() => {
     let isMounted = true;
 
+    // Use singleton's reconnect — ensures one shared WalletConnect bridge
     const restoreSession = async () => {
       try {
-        const restoredAddress = await restoreWalletSession();
+        const restoredAddress = await peraWalletService.reconnect();
 
         if (isMounted && restoredAddress) {
           setAccountAddress(restoredAddress);

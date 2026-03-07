@@ -1,30 +1,33 @@
 import algosdk from 'algosdk';
-import { PeraWalletConnect } from '@perawallet/connect';
+import peraWalletService from './perawallet';
 
+// Algorand TestNet endpoints (never use MainNet here)
 const algodUrl = process.env.REACT_APP_ALGOD_URL || 'https://testnet-api.algonode.cloud';
 const indexerUrl = process.env.REACT_APP_INDEXER_URL || 'https://testnet-idx.algonode.cloud';
 
 const algodClient = new algosdk.Algodv2('', algodUrl, '');
 const indexerClient = new algosdk.Indexer('', indexerUrl, '');
-// shouldShowSignTxnToast removed — prevents the mobile-only deep-link toast on desktop
-const peraWallet = new PeraWalletConnect();
+
+// ─── Wallet helpers (delegate to the singleton) ──────────────────────────────
 
 export const connectWallet = async () => {
-  const accounts = await peraWallet.connect();
+  const accounts = await peraWalletService.connect();
   return accounts?.[0] || '';
 };
 
 export const restoreWalletSession = async () => {
-  const accounts = await peraWallet.reconnectSession();
-  return accounts?.[0] || '';
+  return peraWalletService.reconnect();
 };
 
 export const disconnectWallet = async () => {
-  await peraWallet.disconnect();
+  await peraWalletService.disconnect();
 };
+
+// ─── Payment ─────────────────────────────────────────────────────────────────
 
 export const sendPayment = async ({ sender, receiver, amount, note }) => {
   console.log('[Algorand] sendPayment called', { sender, receiver, amount });
+  console.log('[Algorand] Wallet accounts:', peraWalletService.accounts);
 
   if (!sender) {
     throw new Error('Connect your wallet before settling a payment.');
@@ -46,25 +49,24 @@ export const sendPayment = async ({ sender, receiver, amount, note }) => {
   const microAlgos = Math.round(Number(amount) * 1_000_000);
   console.log('[Algorand] Building transaction — microAlgos:', microAlgos);
 
+  // algosdk v3: uses `sender`/`receiver` (not `from`/`to`)
   const transaction = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
     sender,
     receiver,
     amount: microAlgos,
-    note: note ? new TextEncoder().encode(note) : undefined,
+    note: note ? new TextEncoder().encode(note) : new TextEncoder().encode('SplitBill Settlement'),
     suggestedParams,
   });
 
-  console.log('[Algorand] Transaction built, requesting Pera Wallet signature...');
+  console.log('[Algorand] Transaction built — requesting Pera Wallet signature...');
+  console.log('[Algorand] Sender wallet:', sender);
+  console.log('[Algorand] Receiver wallet:', receiver);
+  console.log('[Algorand] Amount (ALGO):', amount);
 
   let signedTransactions;
   try {
-    // @perawallet/connect v1: signTransaction expects SignerTransaction[][] (array of groups)
-    signedTransactions = await peraWallet.signTransaction([[
-      {
-        txn: transaction,
-        signers: [sender],
-      },
-    ]]);
+    // Uses the singleton — sign() wraps with the correct [[...]] group format for v1.5.x
+    signedTransactions = await peraWalletService.sign(transaction, sender);
   } catch (signError) {
     console.error('[Algorand] Signing error:', signError);
     if (
@@ -78,14 +80,14 @@ export const sendPayment = async ({ sender, receiver, amount, note }) => {
     throw signError;
   }
 
-  console.log('[Algorand] Transaction signed, broadcasting to Testnet...');
+  console.log('[Algorand] Transaction signed — broadcasting to Testnet...');
 
-  // algosdk v3: sendRawTransaction().do() returns { txid } (lowercase)
+  // algosdk v3: sendRawTransaction().do() returns { txid } (lowercase d)
   const { txid: txId } = await algodClient.sendRawTransaction(signedTransactions).do();
   console.log('[Algorand] Broadcasted — txId:', txId, '— awaiting confirmation...');
 
   await algosdk.waitForConfirmation(algodClient, txId, 4);
-  console.log('[Algorand] Transaction confirmed on-chain:', txId);
+  console.log('[Algorand] Transaction confirmed on Algorand TestNet:', txId);
 
   return txId;
 };
