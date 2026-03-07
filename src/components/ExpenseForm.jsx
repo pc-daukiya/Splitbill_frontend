@@ -1,14 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Camera } from 'lucide-react';
+import { uploadBill } from '../services/api';
 
 const getMemberId = (member) => member?.id || member?.userId || member?.walletAddress || member?.email;
 const getMemberLabel = (member) => member?.name || member?.displayName || member?.email || member?.walletAddress || 'Member';
 
-function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
+function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false, groupId = null }) {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [paidBy, setPaidBy] = useState('');
   const [splitBetween, setSplitBetween] = useState([]);
   const [error, setError] = useState('');
+  const [billPreview, setBillPreview] = useState(null);
+  const [billUploading, setBillUploading] = useState(false);
+  const [billError, setBillError] = useState('');
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const memberIds = members.map(getMemberId).filter(Boolean);
@@ -25,6 +31,39 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
 
       return [...currentMembers, memberId];
     });
+  };
+
+  const handleBillUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+      setBillError('Only JPG and PNG files are allowed.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setBillError('File size must be under 5 MB.');
+      return;
+    }
+
+    setBillPreview(URL.createObjectURL(file));
+    setBillUploading(true);
+    setBillError('');
+
+    try {
+      const result = await uploadBill(file, groupId);
+      if (result?.total_amount && Number(result.total_amount) > 0) {
+        setAmount(String(result.total_amount));
+        setDescription('Bill');
+      } else {
+        setBillError('Could not read bill. Please enter amount manually.');
+      }
+    } catch {
+      setBillError('Could not read bill. Please enter amount manually.');
+    } finally {
+      setBillUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -84,6 +123,39 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
       </div>
 
       <form className="space-y-5" onSubmit={handleSubmit}>
+        {/* ── Bill Scanner ── */}
+        <div>
+          <p className="mb-2 text-sm font-medium text-slate-200">Scan Bill <span className="text-xs font-normal text-slate-500">(optional — auto‑fills amount)</span></p>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={billUploading}
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-700 bg-slate-950/70 px-4 py-2.5 text-sm font-medium text-slate-300 transition hover:border-cyan-400 hover:text-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Camera size={14} />
+              {billUploading ? 'Scanning…' : 'Upload Bill'}
+            </button>
+            {billPreview && (
+              <img
+                src={billPreview}
+                alt="Bill preview"
+                className="h-14 w-14 rounded-xl border border-slate-700 object-cover"
+              />
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png"
+            className="hidden"
+            onChange={handleBillUpload}
+          />
+          {billError ? (
+            <p className="mt-2 text-xs text-amber-400">{billError}</p>
+          ) : null}
+        </div>
+
         <div>
           <label className="mb-2 block text-sm font-medium text-slate-200" htmlFor="expense-description">
             Description

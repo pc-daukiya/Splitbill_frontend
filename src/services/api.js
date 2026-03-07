@@ -137,3 +137,44 @@ export const removeMember = async (groupId, userId, requestingUserId, token) => 
     throw normalizeError(error);
   }
 };
+
+export const sendReminder = async (payload, token) => {
+  try {
+    const response = await apiClient.post('/api/reminders/send', payload, buildConfig(token));
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
+
+export const fetchReminders = async (userId, token) => {
+  try {
+    const response = await apiClient.get(`/api/reminders/inbox/${userId}`, buildConfig(token));
+    return Array.isArray(response.data) ? response.data : [];
+  } catch {
+    return [];
+  }
+};
+
+export const markReminderRead = async (reminderId, token) => {
+  try {
+    await apiClient.patch(`/api/reminders/${reminderId}/read`, {}, buildConfig(token));
+  } catch {
+    // silently fail — not critical
+  }
+};
+
+export const uploadBill = async (imageFile, groupId) => {
+  try {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+    if (groupId != null) formData.append('groupId', String(groupId));
+    const response = await apiClient.post('/api/expenses/upload-bill', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 60000,
+    });
+    return response.data;
+  } catch (error) {
+    throw normalizeError(error);
+  }
+};
