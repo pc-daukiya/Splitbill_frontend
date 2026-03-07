@@ -11,11 +11,12 @@ root.render(
   <React.StrictMode>
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <Auth0Provider
-        domain="dev-3h3frztmr6l6zsjq.us.auth0.com"
-        clientId="w0zrPgBHpexcEnx3FZMtyvNjK1rdbxdW"
+        domain={process.env.REACT_APP_AUTH0_DOMAIN}
+        clientId={process.env.REACT_APP_AUTH0_CLIENT_ID}
         authorizationParams={{
           redirect_uri: window.location.origin,
           audience: process.env.REACT_APP_AUTH0_AUDIENCE,
+          scope: 'openid profile email',
         }}
       >
         <App />
