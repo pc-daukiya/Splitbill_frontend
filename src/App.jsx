@@ -94,7 +94,9 @@ function App() {
     if (!isAuthenticated || !user?.sub) return;
     (async () => {
       try {
-        const token = await getAccessTokenSilently();
+        const token = await getAccessTokenSilently({
+          authorizationParams: { audience: process.env.REACT_APP_AUTH0_AUDIENCE },
+        });
         const synced = await syncUser(
           { auth0Id: user.sub, email: user.email, name: user.name },
           token,
@@ -111,7 +113,9 @@ function App() {
     setWalletAddress(address);
     if (backendUserId && address) {
       try {
-        const token = await getAccessTokenSilently();
+        const token = await getAccessTokenSilently({
+          authorizationParams: { audience: process.env.REACT_APP_AUTH0_AUDIENCE },
+        });
         await updateWalletAddress(backendUserId, address, token);
       } catch {
         // non-fatal

@@ -21,7 +21,9 @@ function Dashboard() {
 
   const getToken = useCallback(async () => {
     try {
-      return await getAccessTokenSilently();
+      return await getAccessTokenSilently({
+        authorizationParams: { audience: process.env.REACT_APP_AUTH0_AUDIENCE },
+      });
     } catch (tokenError) {
       return '';
     }

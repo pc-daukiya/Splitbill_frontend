@@ -15,6 +15,7 @@ root.render(
         clientId="w0zrPgBHpexcEnx3FZMtyvNjK1rdbxdW"
         authorizationParams={{
           redirect_uri: window.location.origin,
+          audience: process.env.REACT_APP_AUTH0_AUDIENCE,
         }}
       >
         <App />
