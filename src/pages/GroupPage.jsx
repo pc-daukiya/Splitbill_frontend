@@ -355,32 +355,54 @@ function GroupPage({ walletAddress }) {
                     className="rounded-2xl border border-slate-800 bg-slate-950/60 p-5"
                   >
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                      <div>
+                      <div className="flex-1">
                         <p className="text-base font-semibold text-white">
                           {debtorName} owes {creditorName}
                         </p>
-                        <p className="mt-1 text-sm text-slate-400">Amount: {formatMoney(amount)}</p>
-                        {algoPriceINR ? (
-                          <p className="mt-1 text-xs font-medium text-cyan-400">
-                            ≈ {(amount / algoPriceINR).toFixed(4)} ALGO
-                            <span className="ml-1 text-slate-500">(@ ₹{algoPriceINR}/ALGO)</span>
-                          </p>
-                        ) : null}
-                        <p className="mt-2 text-xs text-slate-500">
+
+                        {/* INR amount + live ALGO estimate */}
+                        <div className="mt-2 inline-flex flex-wrap items-baseline gap-2 rounded-xl border border-cyan-500/20 bg-cyan-500/5 px-3 py-2">
+                          <span className="text-lg font-bold text-white">{formatMoney(amount)}</span>
+                          {algoPriceINR ? (
+                            <>
+                              <span className="text-sm text-slate-400">≈</span>
+                              <span className="text-lg font-bold text-cyan-300">
+                                {(amount / algoPriceINR).toFixed(4)} ALGO
+                              </span>
+                              <span className="text-xs text-slate-500">(@ ₹{algoPriceINR}/ALGO · live rate)</span>
+                            </>
+                          ) : (
+                            <span className="text-xs text-slate-500">fetching ALGO price...</span>
+                          )}
+                        </div>
+
+                        <p className="mt-3 text-xs text-slate-500">
                           Recipient wallet: {creditorWallet || 'Missing wallet address'}
                         </p>
                         <p className="mt-1 text-xs text-slate-500">
                           Sender wallet: {debtorWallet || walletAddress || 'Connect wallet to proceed'}
                         </p>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleSettlePayment(balance, index)}
-                        disabled={!walletAddress || !creditorWallet || settlingId === settleKey}
-                        className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {settlingId === settleKey ? 'Settling...' : 'Settle payment'}
-                      </button>
+
+                      <div className="flex flex-col items-end gap-2">
+                        {algoPriceINR ? (
+                          <p className="text-xs text-slate-400">
+                            Wallet will show <span className="font-semibold text-cyan-300">{(amount / algoPriceINR).toFixed(4)} ALGO</span>
+                          </p>
+                        ) : null}
+                        <button
+                          type="button"
+                          onClick={() => handleSettlePayment(balance, index)}
+                          disabled={!walletAddress || !creditorWallet || settlingId === settleKey}
+                          className="inline-flex items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {settlingId === settleKey
+                            ? 'Settling...'
+                            : algoPriceINR
+                              ? `Settle ${(amount / algoPriceINR).toFixed(4)} ALGO`
+                              : 'Settle payment'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
