@@ -23,6 +23,21 @@ export const disconnectWallet = async () => {
   await peraWalletService.disconnect();
 };
 
+// ─── Currency conversion ──────────────────────────────────────────────────────
+
+/**
+ * Convert an INR amount to ALGO for on-chain transactions.
+ * Expenses are stored in INR; Algorand requires ALGO units.
+ * The rate is kept as a constant here — update ALGO_PRICE_INR if the live rate
+ * changes significantly during your demo/hackathon.
+ */
+const ALGO_PRICE_INR = 80; // 1 ALGO ≈ ₹80
+
+const convertINRToAlgo = (inrAmount) => {
+  const algo = Number(inrAmount) / ALGO_PRICE_INR;
+  return algo;
+};
+
 // ─── Payment ─────────────────────────────────────────────────────────────────
 
 export const sendPayment = async ({ sender, receiver, amount, note }) => {
@@ -41,13 +56,18 @@ export const sendPayment = async ({ sender, receiver, amount, note }) => {
     throw new Error('Payment amount must be greater than zero.');
   }
 
+  // Convert INR → ALGO (only for the on-chain transaction; DB values stay in INR)
+  const algoAmount = convertINRToAlgo(amount);
+  console.log('[Algorand] INR amount:', amount, '₹');
+  console.log('[Algorand] Converted ALGO:', algoAmount, 'ALGO');
+
   console.log('[Algorand] Fetching transaction params from Testnet...');
   const suggestedParams = await algodClient.getTransactionParams().do();
   console.log('[Algorand] Transaction params received:', suggestedParams);
 
-  // algosdk v3: algosToMicroalgos was removed — multiply manually
-  const microAlgos = Math.round(Number(amount) * 1_000_000);
-  console.log('[Algorand] Building transaction — microAlgos:', microAlgos);
+  // Convert ALGO → microALGO (algosdk v3: algosToMicroalgos was removed)
+  const microAlgos = Math.round(algoAmount * 1_000_000);
+  console.log('[Algorand] microAlgos to send:', microAlgos);
 
   // algosdk v3: uses `sender`/`receiver` (not `from`/`to`)
   const transaction = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
@@ -61,7 +81,7 @@ export const sendPayment = async ({ sender, receiver, amount, note }) => {
   console.log('[Algorand] Transaction built — requesting Pera Wallet signature...');
   console.log('[Algorand] Sender wallet:', sender);
   console.log('[Algorand] Receiver wallet:', receiver);
-  console.log('[Algorand] Amount (ALGO):', amount);
+  console.log('[Algorand] Sending:', algoAmount, 'ALGO (₹' + amount + ' INR)');
 
   let signedTransactions;
   try {
