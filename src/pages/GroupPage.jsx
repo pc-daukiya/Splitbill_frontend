@@ -419,9 +419,9 @@ function GroupPage({ walletAddress }) {
         </div>
       </div>
 
-      {error ? <p className="rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-600">{error}</p> : null}
+      {error ? <p className="rounded-2xl bg-amber-500/15 px-4 py-3 text-sm text-amber-500">{error}</p> : null}
       {balanceError ? (
-        <div className="rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-500">
+        <div className="rounded-2xl bg-red-500/15 px-4 py-3 text-sm text-red-400">
           {balanceError}
         </div>
       ) : null}

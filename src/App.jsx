@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import GroupPage from './pages/GroupPage';
 import { WalletContext } from './context/WalletContext';
 import { ThemeProvider } from './context/ThemeContext';
+import ThemeSwitcher from './components/ThemeSwitcher';
 import { syncUser, updateWalletAddress } from './services/api';
 
 function ProtectedRoute({ children }) {
@@ -45,6 +46,10 @@ function LandingPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-theme-surface px-4 py-16">
+      {/* Theme switcher — top right corner */}
+      <div className="absolute right-4 top-4 z-10">
+        <ThemeSwitcher />
+      </div>
       {/* Ambient glow blobs */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -left-48 -top-48 h-96 w-96 rounded-full bg-cyan-400/10 blur-3xl" />

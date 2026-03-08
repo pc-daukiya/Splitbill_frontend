@@ -303,7 +303,7 @@ function Dashboard() {
           </div>
 
           {error ? (
-            <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-600">
+            <p className="mt-4 rounded-xl bg-amber-500/15 px-4 py-3 text-sm text-amber-500">
               {error}
             </p>
           ) : null}

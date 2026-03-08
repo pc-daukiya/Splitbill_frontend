@@ -1,14 +1,20 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Camera } from 'lucide-react';
+import { uploadBill } from '../services/api';
 
 const getMemberId = (member) => member?.id || member?.userId || member?.walletAddress || member?.email;
 const getMemberLabel = (member) => member?.name || member?.displayName || member?.email || member?.walletAddress || 'Member';
 
-function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
+function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false, groupId = null }) {
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
   const [paidBy, setPaidBy] = useState('');
   const [splitBetween, setSplitBetween] = useState([]);
   const [error, setError] = useState('');
+  const [billPreview, setBillPreview] = useState(null);
+  const [billUploading, setBillUploading] = useState(false);
+  const [billError, setBillError] = useState('');
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     const memberIds = members.map(getMemberId).filter(Boolean);
@@ -25,6 +31,39 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
 
       return [...currentMembers, memberId];
     });
+  };
+
+  const handleBillUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+      setBillError('Only JPG and PNG files are allowed.');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setBillError('File size must be under 5 MB.');
+      return;
+    }
+
+    setBillPreview(URL.createObjectURL(file));
+    setBillUploading(true);
+    setBillError('');
+
+    try {
+      const result = await uploadBill(file, groupId);
+      if (result?.total_amount && Number(result.total_amount) > 0) {
+        setAmount(String(result.total_amount));
+        setDescription('Bill');
+      } else {
+        setBillError('Could not read bill. Please enter amount manually.');
+      }
+    } catch {
+      setBillError('Could not read bill. Please enter amount manually.');
+    } finally {
+      setBillUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
   };
 
   const handleSubmit = async (event) => {
@@ -72,7 +111,7 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
       <div className="mb-6 flex items-start justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-400">New expense</p>
-          <h3 className="mt-2 text-xl font-semibold text-white">Record a shared cost</h3>
+          <h3 className="mt-2 text-xl font-semibold text-theme-text">Record a shared cost</h3>
         </div>
         <button
           type="button"
@@ -84,6 +123,39 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
       </div>
 
       <form className="space-y-5" onSubmit={handleSubmit}>
+        {/* ── Bill Scanner ── */}
+        <div>
+          <p className="mb-2 text-sm font-medium text-theme-subtext">Scan Bill <span className="text-xs font-normal text-theme-subtext/70">(optional — auto‑fills amount)</span></p>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={billUploading}
+              className="inline-flex items-center gap-2 rounded-2xl border border-theme-border bg-theme-bg px-4 py-2.5 text-sm font-medium text-theme-subtext transition hover:border-cyan-400 hover:text-cyan-400 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Camera size={14} />
+              {billUploading ? 'Scanning…' : 'Upload Bill'}
+            </button>
+            {billPreview && (
+              <img
+                src={billPreview}
+                alt="Bill preview"
+                className="h-14 w-14 rounded-xl border border-theme-border object-cover"
+              />
+            )}
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png"
+            className="hidden"
+            onChange={handleBillUpload}
+          />
+          {billError ? (
+            <p className="mt-2 text-xs text-amber-400">{billError}</p>
+          ) : null}
+        </div>
+
         <div>
           <label className="mb-2 block text-sm font-medium text-theme-subtext" htmlFor="expense-description">
             Description
@@ -150,7 +222,7 @@ function ExpenseForm({ members = [], onSubmit, onCancel, submitting = false }) {
                   key={memberId}
                   className={`flex cursor-pointer items-center justify-between rounded-2xl border px-4 py-3 text-sm transition ${
                     isChecked
-                      ? 'border-cyan-400 bg-cyan-50 text-theme-text'
+                      ? 'border-cyan-400 bg-cyan-500/15 text-theme-text'
                       : 'border-theme-border bg-theme-bg text-theme-subtext'
                   }`}
                 >
