@@ -129,11 +129,11 @@ function Navbar() {
 
       {/* Toast OUTSIDE <header> — backdrop-filter on header would trap position:fixed children */}
       {toast && (
-        <div className="fixed bottom-5 right-5 z-[9999] flex max-w-sm items-start gap-3 rounded-2xl border border-amber-500/40 bg-slate-900 p-4 shadow-2xl shadow-slate-950/60">
+        <div className="fixed bottom-5 right-4 left-4 sm:left-auto sm:right-5 z-[9999] flex max-w-sm items-start gap-3 rounded-2xl border border-amber-500/40 bg-theme-surface p-4 shadow-2xl shadow-theme-border/60">
           <span className="mt-0.5 text-xl">🔔</span>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-widest text-amber-400">Payment Reminder</p>
-            <p className="mt-1 text-sm text-slate-200">{toast.message}</p>
+            <p className="mt-1 text-sm text-theme-text">{toast.message}</p>
             {toast.audioUrl && (
               <button
                 type="button"
@@ -144,16 +144,14 @@ function Navbar() {
               </button>
             )}
           </div>
-          <button type="button" onClick={() => setToast(null)} className="shrink-0 text-lg leading-none text-slate-500 hover:text-white">×</button>
+          <button type="button" onClick={() => setToast(null)} className="shrink-0 text-lg leading-none text-theme-subtext hover:text-theme-text">×</button>
         </div>
       )}
 
     <header className="sticky top-0 z-30 flex items-center gap-4 border-b border-theme-border/60 bg-theme-surface/80 px-4 py-3 backdrop-blur-xl sm:px-6 lg:px-8">
       {/* Mobile logo — sidebar is hidden on mobile */}
       <Link to="/dashboard" className="flex items-center gap-2.5 md:hidden">
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-cyan-500 text-sm font-black text-slate-950">
-          ₳
-        </div>
+        <img src="/logo.jpeg" alt="SplitBill" className="h-8 w-8 rounded-xl object-cover" />
         <span className="text-sm font-bold text-theme-text">SplitBill</span>
       </Link>
 
@@ -181,7 +179,7 @@ function Navbar() {
 
           {/* Dropdown */}
           {showBell && (
-            <div className="absolute right-0 top-11 z-50 w-80 rounded-2xl border border-theme-border bg-theme-surface shadow-xl shadow-theme-border/30">
+            <div className="absolute right-0 top-11 z-50 w-[calc(100vw-2rem)] max-w-sm sm:w-80 rounded-2xl border border-theme-border bg-theme-surface shadow-xl shadow-theme-border/30">
               <div className="border-b border-theme-border px-4 py-3">
                 <p className="text-xs font-semibold uppercase tracking-widest text-theme-subtext">Reminders</p>
               </div>

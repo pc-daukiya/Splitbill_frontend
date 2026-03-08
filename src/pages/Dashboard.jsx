@@ -189,7 +189,7 @@ function Dashboard() {
       </div>
 
       {/* Main grid: forms + groups list */}
-      <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
         {/* Left: Create + Join forms */}
         <div className="space-y-5">
           {/* Create group */}

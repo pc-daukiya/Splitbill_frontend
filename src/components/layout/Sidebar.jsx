@@ -16,9 +16,7 @@ export default function Sidebar() {
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-theme-border bg-theme-surface md:flex">
       {/* Logo */}
       <div className="flex items-center gap-3 border-b border-theme-border px-5 py-5">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-cyan-500 text-base font-black text-slate-950">
-          ₳
-        </div>
+        <img src="/logo.jpeg" alt="SplitBill" className="h-9 w-9 shrink-0 rounded-xl object-cover" />
         <div>
           <p className="text-sm font-bold text-theme-text">SplitBill</p>
           <p className="text-xs text-theme-subtext">Algorand Testnet</p>

@@ -332,7 +332,7 @@ function GroupPage({ walletAddress }) {
             </div>
           ))}
         </div>
-        <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
           <div className="h-80 rounded-3xl border border-theme-border bg-theme-surface p-6" />
           <div className="h-80 rounded-3xl border border-theme-border bg-theme-surface p-6" />
         </div>
@@ -361,13 +361,13 @@ function GroupPage({ walletAddress }) {
     <div className="space-y-8">
       {/* Reminder sent popup toast — fixed outside any backdrop-filter ancestor */}
       {reminderToast && (
-        <div className="fixed bottom-6 right-6 z-[9999] flex max-w-xs items-start gap-3 rounded-2xl border border-emerald-500/40 bg-slate-900 p-4 shadow-2xl shadow-slate-950/70 animate-pulse-once">
+        <div className="fixed bottom-6 right-4 left-4 sm:left-auto sm:right-6 z-[9999] flex max-w-xs items-start gap-3 rounded-2xl border border-emerald-500/40 bg-theme-surface p-4 shadow-2xl shadow-theme-border/60">
           <span className="mt-0.5 text-xl">✅</span>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">{reminderToast.title}</p>
-            <p className="mt-1 text-sm text-slate-200">{reminderToast.message}</p>
+            <p className="mt-1 text-sm text-theme-text">{reminderToast.message}</p>
           </div>
-          <button type="button" onClick={() => setReminderToast(null)} className="shrink-0 text-lg leading-none text-slate-500 hover:text-white">×</button>
+          <button type="button" onClick={() => setReminderToast(null)} className="shrink-0 text-lg leading-none text-theme-subtext hover:text-theme-text">×</button>
         </div>
       )}
       {/* Header */}
@@ -426,7 +426,7 @@ function GroupPage({ walletAddress }) {
         </div>
       ) : null}
       {successMessage ? (
-        <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm text-emerald-600">{successMessage}</p>
+        <p className="rounded-2xl bg-emerald-500/15 px-4 py-3 text-sm text-emerald-400">{successMessage}</p>
       ) : null}
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">

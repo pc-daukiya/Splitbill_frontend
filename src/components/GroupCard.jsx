@@ -52,7 +52,7 @@ function GroupCard({ group }) {
         <p className="text-sm text-theme-subtext">Tap in to review balances and settle up.</p>
         <Link
           to={`/groups/${group?.id || group?.groupId}`}
-          className="inline-flex items-center rounded-xl bg-theme-surface px-4 py-2 text-sm font-semibold text-slate-900 transition group-hover:bg-cyan-300"
+          className="inline-flex items-center rounded-xl bg-theme-bg px-4 py-2 text-sm font-semibold text-theme-text border border-theme-border transition group-hover:bg-cyan-500 group-hover:text-slate-950 group-hover:border-cyan-500"
         >
           Open group
         </Link>
