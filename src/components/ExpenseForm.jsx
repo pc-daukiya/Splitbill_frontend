@@ -1,4 +1,4 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const getMemberId = (member) => member?.id || member?.userId || member?.walletAddress || member?.email;
 const getMemberLabel = (member) => member?.name || member?.displayName || member?.email || member?.walletAddress || 'Member';

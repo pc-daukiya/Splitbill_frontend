@@ -1,11 +1,11 @@
 ﻿import { useCallback, useEffect, useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Users, Receipt, RefreshCw, Plus, Trash2, UserMinus, Wallet } from 'lucide-react';
+import { ArrowLeft, Users, Receipt, RefreshCw, Plus, Trash2, UserMinus, Wallet, Bell } from 'lucide-react';
 import ExpenseForm from '../components/ExpenseForm';
 import SkeletonCard from '../components/ui/SkeletonCard';
 import { checkTransaction, getAccountBalance, sendPayment } from '../services/algorand';
-import { createExpense, createSettlement, deleteGroup, getGroupBalances, getGroupById, getGroupExpenses, removeMember } from '../services/api';
+import { createExpense, createSettlement, deleteGroup, getGroupBalances, getGroupById, getGroupExpenses, removeMember, sendReminder } from '../services/api';
 import { getAlgoPriceINR } from '../services/algoPrice';
 import { useWallet } from '../context/WalletContext';
 
@@ -73,6 +73,8 @@ function GroupPage({ walletAddress }) {
   const [removingMemberId, setRemovingMemberId] = useState(null);
   const [walletBalance, setWalletBalance] = useState(null); // ALGO balance of connected wallet
   const [balanceError, setBalanceError] = useState('');
+  const [sendingReminderId, setSendingReminderId] = useState('');
+  const [reminderToast, setReminderToast] = useState(null); // { title, message } shown as popup
 
   // Fetch live ALGO/INR price once on mount for the conversion preview
   useEffect(() => {
@@ -240,6 +242,40 @@ function GroupPage({ walletAddress }) {
     }
   };
 
+  const handleSendReminder = async (balance, index) => {
+    if (!backendUserId) {
+      setError('Unable to identify current user.');
+      return;
+    }
+    const settleKey = balance?.id || `${index}`;
+    setSendingReminderId(settleKey);
+    setError('');
+    setSuccessMessage('');
+    try {
+      const token = await getToken();
+      const result = await sendReminder(
+        {
+          groupId: Number(groupId),
+          senderUserId: Number(backendUserId),
+          debtorUserId: Number(balance.fromUser),
+          creditorUserId: Number(balance.toUser),
+          amountPending: Number(balance.amount ?? balance.remainingAmount ?? 0),
+        },
+        token,
+      );
+      const sentTo = result?.sent_to || 'the debtor';
+      setReminderToast({
+        title: 'Reminder Sent! 🔔',
+        message: `${sentTo} has been notified to pay their share.`,
+      });
+      setTimeout(() => setReminderToast(null), 5000);
+    } catch (reminderError) {
+      setError(reminderError.message || 'Failed to send reminder.');
+    } finally {
+      setSendingReminderId('');
+    }
+  };
+
   const handleDeleteGroup = async () => {
     if (!backendUserId) {
       setError('Unable to identify current user.');
@@ -323,6 +359,17 @@ function GroupPage({ walletAddress }) {
 
   return (
     <div className="space-y-8">
+      {/* Reminder sent popup toast — fixed outside any backdrop-filter ancestor */}
+      {reminderToast && (
+        <div className="fixed bottom-6 right-6 z-[9999] flex max-w-xs items-start gap-3 rounded-2xl border border-emerald-500/40 bg-slate-900 p-4 shadow-2xl shadow-slate-950/70 animate-pulse-once">
+          <span className="mt-0.5 text-xl">✅</span>
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-semibold uppercase tracking-widest text-emerald-400">{reminderToast.title}</p>
+            <p className="mt-1 text-sm text-slate-200">{reminderToast.message}</p>
+          </div>
+          <button type="button" onClick={() => setReminderToast(null)} className="shrink-0 text-lg leading-none text-slate-500 hover:text-white">×</button>
+        </div>
+      )}
       {/* Header */}
       <div>
         <Link
@@ -449,6 +496,7 @@ function GroupPage({ walletAddress }) {
               onSubmit={handleExpenseSubmit}
               onCancel={() => setShowExpenseForm(false)}
               submitting={submittingExpense}
+              groupId={Number(groupId)}
             />
           ) : null}
 
@@ -580,6 +628,20 @@ function GroupPage({ walletAddress }) {
                               {(paymentNum / algoPriceINR).toFixed(4)} ALGO
                             </span>
                           </p>
+                        )}
+
+                        {/* Send Reminder button — visible to admin or creditor, never to the debtor */}
+                        {(isAdmin || Number(backendUserId) === Number(balance.toUser)) &&
+                          Number(backendUserId) !== Number(balance.fromUser) && (
+                          <button
+                            type="button"
+                            onClick={() => handleSendReminder(balance, index)}
+                            disabled={sendingReminderId === settleKey}
+                            className="inline-flex w-full lg:w-auto items-center justify-center gap-1.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm font-semibold text-amber-300 transition hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <Bell size={13} />
+                            {sendingReminderId === settleKey ? 'Sending…' : 'Remind'}
+                          </button>
                         )}
 
                         <button
